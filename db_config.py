@@ -4,11 +4,14 @@ from flask_sqlalchemy import SQLAlchemy
 db = SQLAlchemy()
 
 def configure_db(app):
-    # Database configuration
-    app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+pymysql://root:YourPassword@localhost/cms'
+    # Load DB credentials from environment variables
+    user = os.getenv("DB_USER", "root")
+    password = os.getenv("DB_PASSWORD", "YourPassword")
+    host = os.getenv("DB_HOST", "localhost")
+    db_name = os.getenv("DB_NAME", "cms")
+
+    app.config['SQLALCHEMY_DATABASE_URI'] = f'mysql+pymysql://scrumlord:scrumlord@localhost/scrumlorddb'
     app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
-    
-    # Initialize the app with the extension
+
     db.init_app(app)
-    
     return db
