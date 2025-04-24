@@ -31,7 +31,7 @@ def admin_index():
 
 @app.route('/login')
 def login():
-   return redirect(url_for('admin_login.login'))
+   return redirect(url_for('admin_dashboard.dashboard'))
 
 if __name__ == '__main__':
     app.run(debug=True)
