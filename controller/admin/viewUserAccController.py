@@ -37,3 +37,25 @@ class viewUserAccController:
             db.session.commit()
             return True
         return False
+    
+    @staticmethod
+    def update_user(user_id, email, phone, role, is_active):
+        """
+        Update user attributes
+        """
+        try:
+            user = User.query.get(user_id)
+            if not user:
+                return False
+
+            user.email = email
+            user.phone = phone
+            user.role = role
+            user.isActive = is_active
+
+            db.session.commit()
+            return True
+        except Exception as e:
+            print(f"Error updating user: {e}")
+            db.session.rollback()
+            return False
