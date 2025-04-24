@@ -28,3 +28,12 @@ class viewUserAccController:
             return None
         except Exception as e:
             return None
+        
+    @staticmethod
+    def delete_user(user_id):
+        user = User.query.get(user_id)
+        if user:
+            db.session.delete(user)
+            db.session.commit()
+            return True
+        return False

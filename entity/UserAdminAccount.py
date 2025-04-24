@@ -4,7 +4,7 @@ from datetime import datetime
 
 
 class User(db.Model):
-    __tablename__ = 'users'
+    __tablename__ = 'usersoo'
     __table_args__ = {'extend_existing': True}
 
     userID = db.Column(db.Integer, primary_key=True)  # ← THIS is your actual PK
