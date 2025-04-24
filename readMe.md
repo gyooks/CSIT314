@@ -7,6 +7,7 @@ please open terminal in vscode and install: (can copy and paste line by line)
 pip install flask
 pip install flask_sqlalchemy
 pip install pymysql
+pip install datetime
 
 how to run the program: 
 1. right-click main.py

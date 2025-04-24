@@ -6,7 +6,7 @@ class User(db.Model):
     
     userID = db.Column(db.Integer, primary_key=True, autoincrement=True)
     email = db.Column(db.String(100), nullable=False)
-    password = db.Column(db.String(100), nullable=False)
+    password = db.Column(db.String(100))
     role = db.Column(db.String(50))
     phone = db.Column(db.String(20))
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
