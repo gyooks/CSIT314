@@ -137,7 +137,7 @@
                                         <a href="#" class="btn btn-sm btn-info" title="View">
                                             <i class="fas fa-eye"></i>
                                         </a>
-                                        <a href="#" class="btn btn-sm btn-warning" title="Edit">
+                                        <a href="{{ url_for('admin_dashboard.edit_user', user_id=user.userID) }}" class="btn btn-sm btn-warning" title="Edit">
                                             <i class="fas fa-edit"></i>
                                         </a>
                                         <form action="{{ url_for('admin_dashboard.delete_user', user_id=user.userID) }}" method="post" style="display:inline;">
