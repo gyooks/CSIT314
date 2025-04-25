@@ -3,6 +3,9 @@ from db_config import db, configure_db
 from entity.UserAccount import User, UserProfile
 from boundary.admin.createUserAcc import create_user_bp
 from boundary.admin.viewUserAcc import admin_dashboard_bp 
+from boundary.admin.searchUserAcc import search_user_bp
+#from boundary.admin.userAdminLogin import admin_login_bp 
+
 
 # Create Flask application
 app = Flask(__name__)
@@ -13,6 +16,9 @@ db = configure_db(app)
 # Register blueprints
 app.register_blueprint(admin_dashboard_bp)
 app.register_blueprint(create_user_bp)
+app.register_blueprint(search_user_bp)
+#app.register_blueprint(admin_login_bp)
+
 
 # Secret key for sessions and flash messages
 app.secret_key = 'your_secret_key_here'  # Change this to a secure key in production

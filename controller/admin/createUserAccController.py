@@ -1,4 +1,4 @@
-from werkzeug.security import generate_password_hash
+# from werkzeug.security import generate_password_hash
 from entity.UserAccount import User, UserProfile
 from db_config import db
 
