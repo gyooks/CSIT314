@@ -3,6 +3,7 @@ from db_config import db, configure_db
 from entity.UserAccount import User, UserProfile
 from boundary.admin.createUserAcc import create_user_bp
 from boundary.admin.viewUserAcc import admin_dashboard_bp 
+from boundary.admin.userAdminLogin import admin_login_bp 
 from boundary.admin.searchUserAcc import search_user_bp
 #from boundary.admin.userAdminLogin import admin_login_bp 
 
@@ -16,6 +17,7 @@ db = configure_db(app)
 # Register blueprints
 app.register_blueprint(admin_dashboard_bp)
 app.register_blueprint(create_user_bp)
+app.register_blueprint(admin_login_bp)
 app.register_blueprint(search_user_bp)
 #app.register_blueprint(admin_login_bp)
 
@@ -35,7 +37,7 @@ def admin_index():
 
 @app.route('/login')
 def login():
-    return redirect(url_for('admin_login.login'))
+   return redirect(url_for('admin_dashboard.dashboard'))
 
 if __name__ == '__main__':
     app.run(debug=True)

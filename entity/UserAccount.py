@@ -2,18 +2,24 @@ from datetime import datetime
 from db_config import db
 
 class User(db.Model):
-    __tablename__ = 'users'
+    __tablename__ = 'USERS'
     
     userID = db.Column(db.Integer, primary_key=True, autoincrement=True)
     email = db.Column(db.String(100), nullable=False)
-    password = db.Column(db.String(100), nullable=False)
+    password = db.Column(db.String(100))
     role = db.Column(db.String(50))
     phone = db.Column(db.String(20))
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
     isActive = db.Column(db.Boolean, default=True)
     
     # Relationship with UserProfile
-    profile = db.relationship('UserProfile', backref='user', lazy=True, uselist=False)
+    profile = db.relationship(
+        'UserProfile',
+        backref='user',
+        lazy=True,
+        uselist=False,
+        foreign_keys='UserProfile.user_id'  
+    )
     
     def __init__(self, email, password, role, phone=None):
         self.email = email
@@ -32,10 +38,10 @@ class User(db.Model):
         }
 
 class UserProfile(db.Model):
-    __tablename__ = 'userprofiles'
+    __tablename__ = 'USERPROFILES'
     
     profile_id = db.Column(db.Integer, primary_key=True, autoincrement=True)
-    user_id = db.Column(db.Integer, db.ForeignKey('users.userID'))
+    user_id = db.Column(db.Integer, db.ForeignKey('USERS.userID'))
     first_name = db.Column(db.String(100))
     last_name = db.Column(db.String(100))
     address = db.Column(db.String(255))
