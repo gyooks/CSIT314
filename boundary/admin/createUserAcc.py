@@ -1,4 +1,4 @@
-from flask import Blueprint, render_template, request, redirect, url_for, flash
+from flask import Blueprint, render_template, request, redirect, url_for, flash, session
 from controller.admin.createUserAccController import createUserAccController
 
 # Create User Account Blueprint
@@ -6,7 +6,13 @@ create_user_bp = Blueprint('create_user', __name__, url_prefix='/admin')
 
 @create_user_bp.route('/create_user', methods=['GET', 'POST'])
 def create_user():
+    
     # This would typically have authentication checks to ensure only admins can access
+    if 'user_id' not in session:
+        flash("You must be logged in to perform this action", "danger")
+        return redirect(url_for('admin_login.userAdminLogin'))
+    user_id = session['user_id']
+        
     if request.method == 'POST':
         # Get form data
         email = request.form.get('email')

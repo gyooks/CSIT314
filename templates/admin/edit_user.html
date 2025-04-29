@@ -7,7 +7,7 @@
 <body>
 <div class="container mt-5">
     <h2>Edit User</h2>
-    <form method="POST" action="{{ url_for('admin_dashboard.edit_user', user_id=user.userID) }}">
+    <form method="POST" action="{{ url_for('admin_dashboard.edit_user', target_user_id=user.userID) }}">
         <div class="mb-3">
             <label>Email</label>
             <input type="email" name="email" value="{{ user.email }}" class="form-control" required>
@@ -19,9 +19,9 @@
         <div class="mb-3">
             <label>Role</label>
             <select name="role" class="form-control">
-                <option value="admin" {% if user.role == 'admin' %}selected{% endif %}>Admin</option>
-                <option value="cleaner" {% if user.role == 'cleaner' %}selected{% endif %}>Cleaner</option>
-                <option value="homeowner" {% if user.role == 'homeowner' %}selected{% endif %}>Homeowner</option>
+                <option value="User admin" {% if user.role == 'User admin' %}selected{% endif %}>User Admin</option>
+                <option value="Cleaner" {% if user.role == 'cleaner' %}selected{% endif %}>Cleaner</option>
+                <option value="Homeowner" {% if user.role == 'homeowner' %}selected{% endif %}>Homeowner</option>
             </select>
         </div>
         <div class="form-check mb-3">

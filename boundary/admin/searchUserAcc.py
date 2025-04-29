@@ -1,4 +1,4 @@
-from flask import Blueprint, render_template, request
+from flask import Blueprint, render_template, request, session
 from controller.admin.searchUserAccController import SearchUserController
 
 search_user_bp = Blueprint('search_user', __name__, url_prefix='/search')
@@ -6,6 +6,10 @@ controller = SearchUserController()
 
 @search_user_bp.route('/', methods=['GET', 'POST'])
 def search_user():
+    if 'user_id' not in session:
+        flash("You must be logged in to perform this action", "danger")
+        return redirect(url_for('admin_login.userAdminLogin'))
+        
     keyword = ""
     results = []
     users = []

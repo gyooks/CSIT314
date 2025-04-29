@@ -1,8 +1,10 @@
+from werkzeug.security import check_password_hash, generate_password_hash
 from datetime import datetime
 from db_config import db
 
 class User(db.Model):
-    __tablename__ = 'USERS'
+    __tablename__ = 'users'
+    __table_args__ = {'extend_existing': True}
     
     userID = db.Column(db.Integer, primary_key=True, autoincrement=True)
     email = db.Column(db.String(100), nullable=False)
@@ -21,12 +23,14 @@ class User(db.Model):
         foreign_keys='UserProfile.user_id'  
     )
     
+    # Constuctor: initializes the object with given values
     def __init__(self, email, password, role, phone=None):
         self.email = email
         self.password = password  # In a real application, you'd hash this password
         self.role = role
         self.phone = phone
-        
+    
+    # Converts object into a dictionary format
     def to_dict(self):
         return {
             'userID': self.userID,
@@ -37,11 +41,18 @@ class User(db.Model):
             'isActive': self.isActive
         }
 
+    # def set_password(self, password):
+    #     self.password = generate_password_hash(password)
+
+    def verify_password(self, password):
+        #return check_password_hash(self.password, password) 
+        return self.password == password
+
 class UserProfile(db.Model):
-    __tablename__ = 'USERPROFILES'
+    __tablename__ = 'userprofiles'
     
     profile_id = db.Column(db.Integer, primary_key=True, autoincrement=True)
-    user_id = db.Column(db.Integer, db.ForeignKey('USERS.userID'))
+    user_id = db.Column(db.Integer, db.ForeignKey('users.userID'))
     first_name = db.Column(db.String(100))
     last_name = db.Column(db.String(100))
     address = db.Column(db.String(255))
