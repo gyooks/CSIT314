@@ -1,4 +1,5 @@
-from entity.UserAccount import User, UserProfile
+from entity.UserAccount import User
+from entity.UserProfile import UserProfile
 from db_config import db
 
 class AdminProfileController:
@@ -6,13 +7,13 @@ class AdminProfileController:
         """Get the profile of the logged-in admin"""
         try:
             # Get user data
-            user = User.query.get(user_id)
+            user = User.find_by_id(user_id)
             
             if not user:
                 return None
             
             # Check if user has a profile
-            profile = UserProfile.query.filter_by(user_id=user_id).first()
+            profile = UserProfile.find_by_user_id(user_id)
             
             # Prepare result
             result = {
@@ -44,7 +45,7 @@ class AdminProfileController:
     #     """Update the admin's profile information"""
     #     try:
     #         # Get user
-    #         user = User.query.get(user_id)
+    #         user = User.find_by_id(user_id)
             
     #         if not user:
     #             return False
@@ -53,7 +54,7 @@ class AdminProfileController:
     #         user.phone = phone
             
     #         # Check if user has a profile
-    #         profile = UserProfile.query.filter_by(user_id=user_id).first()
+    #         profile = UserProfile.find_by_user_id(user_id)
             
     #         if profile:
     #             # Update existing profile

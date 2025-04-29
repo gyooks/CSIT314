@@ -1,11 +1,11 @@
-from flask import Blueprint, render_template, request, session
-from controller.admin.searchUserAccController import SearchUserController
+from flask import Blueprint, render_template, request, session, flash, redirect, url_for
+from controller.admin.searchUserAccController import SearchUserAccController
 
-search_user_bp = Blueprint('search_user', __name__, url_prefix='/search')
-controller = SearchUserController()
+search_userAcc_bp = Blueprint('search_userAcc', __name__, url_prefix='/search')
+controller = SearchUserAccController()
 
-@search_user_bp.route('/', methods=['GET', 'POST'])
-def search_user():
+@search_userAcc_bp.route('/', methods=['GET', 'POST'])
+def search_userAcc():
     if 'user_id' not in session:
         flash("You must be logged in to perform this action", "danger")
         return redirect(url_for('admin_login.userAdminLogin'))
@@ -13,14 +13,3 @@ def search_user():
     keyword = ""
     results = []
     users = []
-    
-    if request.method == 'POST':
-        keyword = request.form['keyword']
-        search_results = controller.search_user(keyword)
-        
-        # Format the results to match what the dashboard template expects
-        for user, profile in search_results:
-            users.append(user)
-    
-    return render_template('admin/dashboard.html', users=users, search_keyword=keyword)
-

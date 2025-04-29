@@ -23,7 +23,7 @@ class User(db.Model):
         foreign_keys='UserProfile.user_id'  
     )
     
-    # Constuctor: initializes the object with given values
+    # Constructor: initializes the object with given values
     def __init__(self, email, password, role, phone=None):
         self.email = email
         self.password = password  # In a real application, you'd hash this password
@@ -41,34 +41,68 @@ class User(db.Model):
             'isActive': self.isActive
         }
 
-    # def set_password(self, password):
-    #     self.password = generate_password_hash(password)
-
     def verify_password(self, password):
         #return check_password_hash(self.password, password) 
         return self.password == password
-
-class UserProfile(db.Model):
-    __tablename__ = 'userprofiles'
     
-    profile_id = db.Column(db.Integer, primary_key=True, autoincrement=True)
-    user_id = db.Column(db.Integer, db.ForeignKey('users.userID'))
-    first_name = db.Column(db.String(100))
-    last_name = db.Column(db.String(100))
-    address = db.Column(db.String(255))
-    isActive = db.Column(db.Boolean, default=True)
+    # Database operations - moved from controllers to entity
+    @classmethod
+    def find_by_email(cls, email):
+        """Find a user by email"""
+        return cls.query.filter_by(email=email).first()
     
-    def __init__(self, user_id, first_name, last_name, address=None):
-        self.user_id = user_id
-        self.first_name = first_name
-        self.last_name = last_name
-        self.address = address
+    @classmethod
+    def find_by_id(cls, user_id):
+        """Find a user by ID"""
+        return cls.query.get(user_id)
+    
+    @classmethod
+    def get_all(cls):
+        """Get all users"""
+        return cls.query.all()
+    
+    @classmethod
+    def search_with_profiles(cls, keyword):
+        """Search users by keyword and join with profiles"""
+        from sqlalchemy import or_
+        from entity.UserProfile import UserProfile
         
-    def to_dict(self):
-        return {
-            'profile_id': self.profile_id,
-            'user_id': self.user_id,
-            'first_name': self.first_name,
-            'last_name': self.last_name,
-            'address': self.address
-        }
+        return db.session.query(cls, UserProfile).outerjoin(
+            UserProfile, cls.userID == UserProfile.user_id
+        ).filter(
+            or_(
+                cls.email.ilike(f'%{keyword}%'),
+                cls.phone.ilike(f'%{keyword}%'),
+            )
+        ).all()
+    
+    def save_to_db(self):
+        """Save user to database"""
+        db.session.add(self)
+        db.session.commit()
+    
+    def delete_from_db(self):
+        """Delete user from database"""
+        db.session.delete(self)
+        db.session.commit()
+        
+    def update_in_db(self, email, phone, role, is_active):
+        """Update user attributes"""
+        self.email = email
+        self.phone = phone
+        self.role = role
+        self.isActive = is_active
+        db.session.commit()
+        return True
+        
+    def suspend(self):
+        """Suspend a user by setting isActive to False"""
+        self.isActive = False
+        db.session.commit()
+        return True
+    
+    def reactivate(self):
+        """Reactivate a user by setting isActive to True"""
+        self.isActive = True
+        db.session.commit()
+        return True

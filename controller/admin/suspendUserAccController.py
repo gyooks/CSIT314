@@ -9,16 +9,13 @@ class suspendUserAccController:
         """
         try:
             # Find user by ID
-            user = User.query.get(user_id)
+            user = User.find_by_id(user_id)
             
             if not user:
                 return False, "User not found"
             
             # Set isActive to False (suspended)
-            user.isActive = False
-            
-            # Commit changes
-            db.session.commit()
+            user.suspend()
             return True, "User suspended successfully"
             
         except Exception as e:
@@ -32,16 +29,13 @@ class suspendUserAccController:
         """
         try:
             # Find user by ID
-            user = User.query.get(user_id)
+            user = User.find_by_id(user_id)
             
             if not user:
                 return False, "User not found"
             
             # Set isActive to True (reactivated)
-            user.isActive = True
-            
-            # Commit changes
-            db.session.commit()
+            user.reactivate()
             return True, "User reactivated successfully"
             
         except Exception as e:

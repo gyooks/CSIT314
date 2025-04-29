@@ -1,5 +1,6 @@
 # from werkzeug.security import generate_password_hash
-from entity.UserAccount import User, UserProfile
+from entity.UserAccount import User
+from entity.UserProfile import UserProfile
 from db_config import db
 
 class createUserAccController:
@@ -10,7 +11,7 @@ class createUserAccController:
         """
         try:
             # Check if user with this email already exists
-            existing_user = User.query.filter_by(email=email).first()
+            existing_user = User.find_by_email(email)
             if existing_user:
                 return False, "Email already exists"
             

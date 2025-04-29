@@ -8,7 +8,7 @@ class viewUserAccController:
         Get all users from database
         """
         try:
-            users = User.query.all()
+            users = User.get_all()
             return [user.to_dict() for user in users]
         except Exception as e:
             return []
@@ -19,7 +19,7 @@ class viewUserAccController:
         Get user by ID
         """
         try:
-            user = User.query.get(user_id)
+            user = User.find_by_id(user_id)
             if user:
                 user_dict = user.to_dict()
                 if user.profile:
@@ -31,10 +31,9 @@ class viewUserAccController:
         
     @staticmethod
     def delete_user(user_id):
-        user = User.query.get(user_id)
+        user = User.find_by_id(user_id)
         if user:
-            db.session.delete(user)
-            db.session.commit()
+            user.delete_from_db()
             return True
         return False
     
@@ -44,16 +43,11 @@ class viewUserAccController:
         Update user attributes
         """
         try:
-            user = User.query.get(user_id)
+            user = User.find_by_id(user_id)
             if not user:
                 return False
 
-            user.email = email
-            user.phone = phone
-            user.role = role
-            user.isActive = is_active
-
-            db.session.commit()
+            user.update_in_db(email, phone, role, is_active)
             return True
         except Exception as e:
             print(f"Error updating user: {e}")
