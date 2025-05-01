@@ -56,6 +56,11 @@ class Category(db.Model):
                 cls.description.ilike(f'%{keyword}%')
             )
         ).all()
+        
+    @classmethod
+    def get_all_active(cls):
+        """Get all active categories"""
+        return cls.query.filter_by(categoryStatus=True).all()
     
     def save_to_db(self):
         """Save category to database"""
@@ -86,3 +91,10 @@ class Category(db.Model):
         self.categoryStatus = True
         db.session.commit()
         return True
+
+
+
+    
+
+    
+  

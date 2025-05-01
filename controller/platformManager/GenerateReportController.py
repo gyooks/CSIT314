@@ -1,382 +1,214 @@
-import json
-from datetime import datetime, timedelta
-from sqlalchemy import func, and_, extract
 from entity.Report import Report
 from entity.Booking import Booking
 from entity.CleaningService import CleaningService
-from entity.Category import Category
 from entity.UserAccount import User
+from datetime import datetime, timedelta
+import json
 from db_config import db
 
-class BaseReportController:
-    """Base controller class for report generation"""
+class ReportBaseController:
+    """Base class for report generation controllers"""
     
-    def _create_report(self, platform_manager_id, report_type, report_data):
-        """Create a new report entity"""
+    @staticmethod
+    def save_report(report_type, report_data):
+        """Save a new report to the database"""
         try:
-            # Check if platform manager exists
-            platform_manager = User.query.filter_by(userID=platform_manager_id, role='Platform manager').first()
-            if not platform_manager:
-                return None
-            
-            # Create report
-            report = Report(platform_manager_id, report_type)
+            # Create a new report
+            report = Report(None, report_type)
             report.reportData = json.dumps(report_data)
             
             # Save to database
             db.session.add(report)
             db.session.commit()
             
-            return report
+            return True, f"{report_type} generated successfully!"
         except Exception as e:
             db.session.rollback()
-            print(f"Error creating report: {str(e)}")
-            return None
+            print(f"Error saving report: {str(e)}")
+            return False, f"Error generating report: {str(e)}"
 
 
-class DailyReportController(BaseReportController):
+class GenerateDailyReportController(ReportBaseController):
     """Controller for generating daily reports"""
     
-    def generate_report(self, platform_manager_id, date_str):
-        """Generate a daily report for the given date"""
+    @classmethod
+    def generate_report(cls):
+        """Generate a daily report with booking and revenue data"""
         try:
-            # Convert string date to datetime object
-            target_date = datetime.strptime(date_str, '%Y-%m-%d').date()
+            # Define the time period (today)
+            today = datetime.now().date()
             
-            # Get all bookings for the specified date
-            bookings = Booking.query.filter(
-                func.date(Booking.bookingDate) == target_date
-            ).all()
+            # Get bookings for today
+            daily_bookings = Booking.get_bookings_by_date_range(today, today)
             
-            # Calculate total revenue
-            total_revenue = sum(booking.totalPrice for booking in bookings)
+            # Calculate metrics
+            total_bookings = len(daily_bookings)
+            total_revenue = sum(booking.totalPrice for booking in daily_bookings if booking.totalPrice)
+            confirmed_bookings = sum(1 for booking in daily_bookings if booking.bookingStatus == 'Confirmed')
+            pending_bookings = sum(1 for booking in daily_bookings if booking.bookingStatus == 'Pending')
             
-            # Count bookings by status
-            status_counts = {}
-            for booking in bookings:
-                status = booking.bookingStatus
-                status_counts[status] = status_counts.get(status, 0) + 1
-            
-            # Get service categories used
-            services_used = {}
-            for booking in bookings:
-                service = CleaningService.query.get(booking.serviceID)
+            # Get service distribution
+            service_counts = {}
+            for booking in daily_bookings:
+                service = CleaningService.find_by_id(booking.serviceID)
                 if service:
-                    category = Category.query.get(service.categoryID)
-                    if category:
-                        services_used[category.name] = services_used.get(category.name, 0) + 1
+                    service_title = service.title
+                    service_counts[service_title] = service_counts.get(service_title, 0) + 1
             
             # Compile report data
             report_data = {
-                'date': date_str,
-                'total_bookings': len(bookings),
+                'report_date': today.strftime('%Y-%m-%d'),
+                'total_bookings': total_bookings,
                 'total_revenue': float(total_revenue),
-                'bookings_by_status': status_counts,
-                'services_by_category': services_used,
-                'generated_at': datetime.now().isoformat()
+                'confirmed_bookings': confirmed_bookings,
+                'pending_bookings': pending_bookings,
+                'service_distribution': service_counts
             }
             
-            # Create report entity
-            return self._create_report(platform_manager_id, 'Daily', report_data)
+            # Save the report
+            return cls.save_report('Daily Report', report_data)
             
         except Exception as e:
             print(f"Error generating daily report: {str(e)}")
-            return None
+            return False, f"Error generating daily report: {str(e)}"
 
 
-class WeeklyReportController(BaseReportController):
+class GenerateWeeklyReportController(ReportBaseController):
     """Controller for generating weekly reports"""
     
-    def generate_report(self, platform_manager_id, start_date_str, end_date_str):
-        """Generate a weekly report for the given date range"""
+    @classmethod
+    def generate_report(cls):
+        """Generate a weekly report with booking and revenue data"""
         try:
-            # Convert string dates to datetime objects
-            start_date = datetime.strptime(start_date_str, '%Y-%m-%d').date()
-            end_date = datetime.strptime(end_date_str, '%Y-%m-%d').date()
+            # Define the time period (last 7 days)
+            end_date = datetime.now().date()
+            start_date = end_date - timedelta(days=6)  # 7 days including today
             
-            # Validate that end_date is after start_date
-            if end_date < start_date:
-                raise ValueError("End date must be after start date")
+            # Get bookings for the week
+            weekly_bookings = Booking.get_bookings_by_date_range(start_date, end_date)
             
-            # Get all bookings for the specified date range
-            bookings = Booking.query.filter(
-                and_(
-                    func.date(Booking.bookingDate) >= start_date,
-                    func.date(Booking.bookingDate) <= end_date
-                )
-            ).all()
+            # Calculate metrics
+            total_bookings = len(weekly_bookings)
+            total_revenue = sum(booking.totalPrice for booking in weekly_bookings if booking.totalPrice)
             
-            # Calculate total revenue
-            total_revenue = sum(booking.totalPrice for booking in bookings)
+            # Calculate daily distribution
+            daily_stats = {}
+            for i in range(7):
+                day = start_date + timedelta(days=i)
+                day_str = day.strftime('%Y-%m-%d')
+                daily_stats[day_str] = {
+                    'bookings': 0,
+                    'revenue': 0.0
+                }
             
-            # Calculate daily averages
-            days_in_range = (end_date - start_date).days + 1
-            avg_bookings_per_day = len(bookings) / days_in_range if days_in_range > 0 else 0
-            avg_revenue_per_day = total_revenue / days_in_range if days_in_range > 0 else 0
+            for booking in weekly_bookings:
+                booking_date = booking.bookingDate.strftime('%Y-%m-%d')
+                if booking_date in daily_stats:
+                    daily_stats[booking_date]['bookings'] += 1
+                    daily_stats[booking_date]['revenue'] += float(booking.totalPrice or 0)
             
-            # Count bookings by status
-            status_counts = {}
-            for booking in bookings:
-                status = booking.bookingStatus
-                status_counts[status] = status_counts.get(status, 0) + 1
-            
-            # Get service categories used
-            services_used = {}
-            for booking in bookings:
-                service = CleaningService.query.get(booking.serviceID)
-                if service:
-                    category = Category.query.get(service.categoryID)
-                    if category:
-                        services_used[category.name] = services_used.get(category.name, 0) + 1
-            
-            # Get most active cleaners
-            cleaner_bookings = {}
-            for booking in bookings:
+            # Get cleaner performance
+            cleaner_stats = {}
+            for booking in weekly_bookings:
                 cleaner_id = booking.cleanerID
-                cleaner_bookings[cleaner_id] = cleaner_bookings.get(cleaner_id, 0) + 1
-            
-            top_cleaners = []
-            for cleaner_id, count in sorted(cleaner_bookings.items(), key=lambda x: x[1], reverse=True)[:5]:
-                cleaner = User.query.get(cleaner_id)
-                if cleaner:
-                    top_cleaners.append({
-                        'cleaner_id': cleaner_id,
-                        'email': cleaner.email,
-                        'bookings_count': count
-                    })
+                if cleaner_id:
+                    if cleaner_id not in cleaner_stats:
+                        cleaner = User.find_by_id(cleaner_id)
+                        cleaner_name = f"{cleaner.profile.first_name} {cleaner.profile.last_name}" if cleaner and cleaner.profile else f"Cleaner {cleaner_id}"
+                        cleaner_stats[cleaner_id] = {
+                            'name': cleaner_name,
+                            'bookings': 0,
+                            'revenue': 0.0
+                        }
+                    cleaner_stats[cleaner_id]['bookings'] += 1
+                    cleaner_stats[cleaner_id]['revenue'] += float(booking.totalPrice or 0)
             
             # Compile report data
             report_data = {
-                'start_date': start_date_str,
-                'end_date': end_date_str,
-                'days_in_period': days_in_range,
-                'total_bookings': len(bookings),
+                'start_date': start_date.strftime('%Y-%m-%d'),
+                'end_date': end_date.strftime('%Y-%m-%d'),
+                'total_bookings': total_bookings,
                 'total_revenue': float(total_revenue),
-                'avg_bookings_per_day': float(avg_bookings_per_day),
-                'avg_revenue_per_day': float(avg_revenue_per_day),
-                'bookings_by_status': status_counts,
-                'services_by_category': services_used,
-                'top_cleaners': top_cleaners,
-                'generated_at': datetime.now().isoformat()
+                'daily_statistics': daily_stats,
+                'cleaner_performance': list(cleaner_stats.values())
             }
             
-            # Create report entity
-            return self._create_report(platform_manager_id, 'Weekly', report_data)
+            # Save the report
+            return cls.save_report('Weekly Report', report_data)
             
         except Exception as e:
             print(f"Error generating weekly report: {str(e)}")
-            return None
+            return False, f"Error generating weekly report: {str(e)}"
 
 
-class MonthlyReportController(BaseReportController):
+class GenerateMonthlyReportController(ReportBaseController):
     """Controller for generating monthly reports"""
     
-    def generate_report(self, platform_manager_id, year, month):
-        """Generate a monthly report for the given year and month"""
+    @classmethod
+    def generate_report(cls):
+        """Generate a monthly report with booking, revenue and trend data"""
         try:
-            # Convert year and month to integers
-            year = int(year)
-            month = int(month)
+            # Define the time period (last 30 days)
+            end_date = datetime.now().date()
+            start_date = end_date - timedelta(days=29)  # 30 days including today
             
-            # Validate month
-            if month < 1 or month > 12:
-                raise ValueError("Month must be between 1 and 12")
+            # Get bookings for the month
+            monthly_bookings = Booking.get_bookings_by_date_range(start_date, end_date)
             
-            # Get all bookings for the specified month and year
-            bookings = Booking.query.filter(
-                and_(
-                    extract('year', Booking.bookingDate) == year,
-                    extract('month', Booking.bookingDate) == month
-                )
-            ).all()
+            # Calculate metrics
+            total_bookings = len(monthly_bookings)
+            total_revenue = sum(booking.totalPrice for booking in monthly_bookings if booking.totalPrice)
+            avg_booking_value = total_revenue / total_bookings if total_bookings > 0 else 0
             
-            # Calculate total revenue
-            total_revenue = sum(booking.totalPrice for booking in bookings)
+            # Calculate weekly trends (divide the month into 4 weeks)
+            weekly_trends = []
+            for i in range(4):
+                week_start = start_date + timedelta(days=i*7)
+                week_end = min(week_start + timedelta(days=6), end_date)
+                
+                week_bookings = [b for b in monthly_bookings if week_start <= b.bookingDate <= week_end]
+                week_revenue = sum(booking.totalPrice for booking in week_bookings if booking.totalPrice)
+                
+                weekly_trends.append({
+                    'week': i+1,
+                    'start_date': week_start.strftime('%Y-%m-%d'),
+                    'end_date': week_end.strftime('%Y-%m-%d'),
+                    'bookings': len(week_bookings),
+                    'revenue': float(week_revenue)
+                })
             
-            # Calculate daily averages for the month
-            import calendar
-            days_in_month = calendar.monthrange(year, month)[1]
-            avg_bookings_per_day = len(bookings) / days_in_month if days_in_month > 0 else 0
-            avg_revenue_per_day = total_revenue / days_in_month if days_in_month > 0 else 0
-            
-            # Count bookings by status
-            status_counts = {}
-            for booking in bookings:
-                status = booking.bookingStatus
-                status_counts[status] = status_counts.get(status, 0) + 1
-            
-            # Get service categories used
-            services_used = {}
-            for booking in bookings:
-                service = CleaningService.query.get(booking.serviceID)
+            # Get category performance
+            category_stats = {}
+            for booking in monthly_bookings:
+                service = CleaningService.find_by_id(booking.serviceID)
                 if service:
-                    category = Category.query.get(service.categoryID)
-                    if category:
-                        services_used[category.name] = services_used.get(category.name, 0) + 1
-            
-            # Get most active cleaners
-            cleaner_bookings = {}
-            for booking in bookings:
-                cleaner_id = booking.cleanerID
-                cleaner_bookings[cleaner_id] = cleaner_bookings.get(cleaner_id, 0) + 1
-            
-            top_cleaners = []
-            for cleaner_id, count in sorted(cleaner_bookings.items(), key=lambda x: x[1], reverse=True)[:5]:
-                cleaner = User.query.get(cleaner_id)
-                if cleaner:
-                    top_cleaners.append({
-                        'cleaner_id': cleaner_id,
-                        'email': cleaner.email,
-                        'bookings_count': count
-                    })
-            
-            # Get most active customers
-            customer_bookings = {}
-            for booking in bookings:
-                customer_id = booking.homeownerID
-                customer_bookings[customer_id] = customer_bookings.get(customer_id, 0) + 1
-            
-            top_customers = []
-            for customer_id, count in sorted(customer_bookings.items(), key=lambda x: x[1], reverse=True)[:5]:
-                customer = User.query.get(customer_id)
-                if customer:
-                    top_customers.append({
-                        'customer_id': customer_id,
-                        'email': customer.email,
-                        'bookings_count': count
-                    })
-            
-            # Month name
-            month_name = calendar.month_name[month]
+                    category_id = service.categoryID
+                    if category_id not in category_stats:
+                        from entity.Category import Category
+                        category = Category.find_by_id(category_id)
+                        category_name = category.name if category else f"Category {category_id}"
+                        category_stats[category_id] = {
+                            'name': category_name,
+                            'bookings': 0,
+                            'revenue': 0.0
+                        }
+                    category_stats[category_id]['bookings'] += 1
+                    category_stats[category_id]['revenue'] += float(booking.totalPrice or 0)
             
             # Compile report data
             report_data = {
-                'year': year,
-                'month': month,
-                'month_name': month_name,
-                'days_in_month': days_in_month,
-                'total_bookings': len(bookings),
+                'start_date': start_date.strftime('%Y-%m-%d'),
+                'end_date': end_date.strftime('%Y-%m-%d'),
+                'total_bookings': total_bookings,
                 'total_revenue': float(total_revenue),
-                'avg_bookings_per_day': float(avg_bookings_per_day),
-                'avg_revenue_per_day': float(avg_revenue_per_day),
-                'bookings_by_status': status_counts,
-                'services_by_category': services_used,
-                'top_cleaners': top_cleaners,
-                'top_customers': top_customers,
-                'generated_at': datetime.now().isoformat()
+                'average_booking_value': float(avg_booking_value),
+                'weekly_trends': weekly_trends,
+                'category_performance': list(category_stats.values())
             }
             
-            # Create report entity
-            return self._create_report(platform_manager_id, 'Monthly', report_data)
+            # Save the report
+            return cls.save_report('Monthly Report', report_data)
             
         except Exception as e:
             print(f"Error generating monthly report: {str(e)}")
-            return None
-
-
-class YearlyReportController(BaseReportController):
-    """Controller for generating yearly reports"""
-    
-    def generate_report(self, platform_manager_id, year):
-        """Generate a yearly report for the given year"""
-        try:
-            # Convert year to integer
-            year = int(year)
-            
-            # Get all bookings for the specified year
-            bookings = Booking.query.filter(
-                extract('year', Booking.bookingDate) == year
-            ).all()
-            
-            # Calculate total revenue
-            total_revenue = sum(booking.totalPrice for booking in bookings)
-            
-            # Calculate monthly breakdown
-            monthly_data = {}
-            for month in range(1, 13):
-                month_bookings = [b for b in bookings if b.bookingDate.month == month]
-                monthly_revenue = sum(booking.totalPrice for booking in month_bookings)
-                monthly_data[month] = {
-                    'month_name': datetime(year, month, 1).strftime('%B'),
-                    'bookings_count': len(month_bookings),
-                    'revenue': float(monthly_revenue)
-                }
-            
-            # Count bookings by status
-            status_counts = {}
-            for booking in bookings:
-                status = booking.bookingStatus
-                status_counts[status] = status_counts.get(status, 0) + 1
-            
-            # Get service categories used
-            services_used = {}
-            for booking in bookings:
-                service = CleaningService.query.get(booking.serviceID)
-                if service:
-                    category = Category.query.get(service.categoryID)
-                    if category:
-                        services_used[category.name] = services_used.get(category.name, 0) + 1
-            
-            # Get most active cleaners
-            cleaner_bookings = {}
-            for booking in bookings:
-                cleaner_id = booking.cleanerID
-                cleaner_bookings[cleaner_id] = cleaner_bookings.get(cleaner_id, 0) + 1
-            
-            top_cleaners = []
-            for cleaner_id, count in sorted(cleaner_bookings.items(), key=lambda x: x[1], reverse=True)[:10]:
-                cleaner = User.query.get(cleaner_id)
-                if cleaner:
-                    top_cleaners.append({
-                        'cleaner_id': cleaner_id,
-                        'email': cleaner.email,
-                        'bookings_count': count
-                    })
-            
-            # Get most active customers
-            customer_bookings = {}
-            for booking in bookings:
-                customer_id = booking.homeownerID
-                customer_bookings[customer_id] = customer_bookings.get(customer_id, 0) + 1
-            
-            top_customers = []
-            for customer_id, count in sorted(customer_bookings.items(), key=lambda x: x[1], reverse=True)[:10]:
-                customer = User.query.get(customer_id)
-                if customer:
-                    top_customers.append({
-                        'customer_id': customer_id,
-                        'email': customer.email,
-                        'bookings_count': count
-                    })
-            
-            # Calculate growth (compare with previous year if available)
-            prev_year_bookings = Booking.query.filter(
-                extract('year', Booking.bookingDate) == year - 1
-            ).all()
-            
-            prev_year_revenue = sum(booking.totalPrice for booking in prev_year_bookings)
-            revenue_growth = ((total_revenue - prev_year_revenue) / prev_year_revenue * 100) if prev_year_revenue > 0 else None
-            
-            bookings_growth = ((len(bookings) - len(prev_year_bookings)) / len(prev_year_bookings) * 100) if len(prev_year_bookings) > 0 else None
-            
-            # Compile report data
-            report_data = {
-                'year': year,
-                'total_bookings': len(bookings),
-                'total_revenue': float(total_revenue),
-                'monthly_breakdown': monthly_data,
-                'bookings_growth': float(bookings_growth) if bookings_growth is not None else None,
-                'revenue_growth': float(revenue_growth) if revenue_growth is not None else None,
-                'bookings_by_status': status_counts,
-                'services_by_category': services_used,
-                'top_cleaners': top_cleaners,
-                'top_customers': top_customers,
-                'generated_at': datetime.now().isoformat()
-            }
-            
-            # Create report entity
-            return self._create_report(platform_manager_id, 'Yearly', report_data)
-            
-        except Exception as e:
-            print(f"Error generating yearly report: {str(e)}")
-            return None
+            return False, f"Error generating monthly report: {str(e)}"

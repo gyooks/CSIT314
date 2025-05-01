@@ -12,6 +12,7 @@ from boundary.admin.viewProfile import admin_profile_bp
 
 from boundary.platformManager.CategoryManagementBoundary import CategoryManagementUI_bp
 from boundary.platformManager.platformManagerLogin import platformManager_login_bp 
+from boundary.platformManager.ReportManagementBoundary import reportManagementUI_bp 
 
 # Create Flask application
 app = Flask(__name__)
@@ -29,6 +30,7 @@ app.register_blueprint(suspend_user_bp)
 app.register_blueprint(admin_profile_bp)
 
 app.register_blueprint(CategoryManagementUI_bp)
+app.register_blueprint(reportManagementUI_bp)
 app.register_blueprint(platformManager_login_bp)
 
 # Secret key for sessions and flash messages

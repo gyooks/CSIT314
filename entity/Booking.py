@@ -10,14 +10,10 @@ class Booking(db.Model):
     cleanerID = db.Column(db.Integer, db.ForeignKey('USERS.userID'))
     bookingDate = db.Column(db.Date)
     create_at = db.Column(db.DateTime, default=datetime.utcnow)
-    totalPrice = db.Column(db.Decimal(10, 2))
+    totalPrice = db.Column(db.Numeric(10, 2))
     bookingStatus = db.Column(db.String(50))
     
-    # Relationships
-    homeowner = db.relationship('User', foreign_keys=[homeownerID], backref='bookings_made')
-    cleaner = db.relationship('User', foreign_keys=[cleanerID], backref='bookings_received')
-    
-    def __init__(self, homeownerID, serviceID, cleanerID, bookingDate, totalPrice, bookingStatus='Pending'):
+    def __init__(self, homeownerID, serviceID, cleanerID, bookingDate, totalPrice, bookingStatus):
         self.homeownerID = homeownerID
         self.serviceID = serviceID
         self.cleanerID = cleanerID
@@ -32,7 +28,51 @@ class Booking(db.Model):
             'serviceID': self.serviceID,
             'cleanerID': self.cleanerID,
             'bookingDate': self.bookingDate.strftime('%Y-%m-%d') if self.bookingDate else None,
-            'create_at': self.create_at,
-            'totalPrice': float(self.totalPrice),
+            'create_at': self.create_at.strftime('%Y-%m-%d %H:%M:%S') if self.create_at else None,
+            'totalPrice': float(self.totalPrice) if self.totalPrice else None,
             'bookingStatus': self.bookingStatus
         }
+    
+    @classmethod
+    def find_by_id(cls, booking_id):
+        """Find a booking by ID"""
+        return cls.query.get(booking_id)
+    
+    @classmethod
+    def get_bookings_by_date_range(cls, start_date, end_date):
+        """Get all bookings within a date range"""
+        return cls.query.filter(
+            cls.bookingDate >= start_date,
+            cls.bookingDate <= end_date
+        ).all()
+    
+    @classmethod
+    def get_bookings_by_homeowner(cls, homeowner_id):
+        """Get all bookings for a specific homeowner"""
+        return cls.query.filter_by(homeownerID=homeowner_id).all()
+    
+    @classmethod
+    def get_bookings_by_cleaner(cls, cleaner_id):
+        """Get all bookings for a specific cleaner"""
+        return cls.query.filter_by(cleanerID=cleaner_id).all()
+    
+    @classmethod
+    def get_bookings_by_status(cls, status):
+        """Get all bookings with a specific status"""
+        return cls.query.filter_by(bookingStatus=status).all()
+        
+    def save_to_db(self):
+        """Save booking to database"""
+        db.session.add(self)
+        db.session.commit()
+    
+    def delete_from_db(self):
+        """Delete booking from database"""
+        db.session.delete(self)
+        db.session.commit()
+        
+    def update_status(self, new_status):
+        """Update booking status"""
+        self.bookingStatus = new_status
+        db.session.commit()
+        return True

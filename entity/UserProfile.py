@@ -31,6 +31,11 @@ class UserProfile(db.Model):
         """Find a profile by user ID"""
         return cls.query.filter_by(user_id=user_id).first()
     
+    @classmethod
+    def find_by_profile_id(cls, profile_id):
+        """Find a profile by profile ID"""
+        return cls.query.get(profile_id)
+    
     def save_to_db(self):
         """Save profile to database"""
         db.session.add(self)

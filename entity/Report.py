@@ -42,3 +42,8 @@ class Report(db.Model):
     def find_by_type(cls, report_type):
         """Find reports by type"""
         return cls.query.filter_by(reportType=report_type).all()
+    
+    def delete_from_db(self):
+        """Delete report from database"""
+        db.session.delete(self)
+        db.session.commit()
