@@ -10,7 +10,7 @@ from boundary.admin.searchUserAcc import search_userAcc_bp
 from boundary.admin.suspendUserAcc import suspend_user_bp
 from boundary.admin.viewProfile import admin_profile_bp
 
-from boundary.platformManager.CategoryManagementBoundary import platformManager_category_bp
+from boundary.platformManager.CategoryManagementBoundary import CategoryManagementUI_bp
 from boundary.platformManager.platformManagerLogin import platformManager_login_bp 
 
 # Create Flask application
@@ -28,7 +28,7 @@ app.register_blueprint(search_userAcc_bp)
 app.register_blueprint(suspend_user_bp)
 app.register_blueprint(admin_profile_bp)
 
-app.register_blueprint(platformManager_category_bp)
+app.register_blueprint(CategoryManagementUI_bp)
 app.register_blueprint(platformManager_login_bp)
 
 # Secret key for sessions and flash messages

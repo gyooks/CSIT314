@@ -54,7 +54,7 @@
                 <div class="p-3">
                     <h4>Platform Manager</h4>
                 </div>
-                <a href="{{ url_for('platformManager_category.manage_categories') }}">
+                <a href="{{ url_for('CategoryManagementUI.manage_categories') }}">
                     <i class="fas fa-tachometer-alt me-2"></i> Dashboard
                 </a>
 
@@ -62,7 +62,7 @@
                     <i class="fas fa-user me-2"></i> Profile
                 </a>
                   
-                <a href="{{ url_for('platformManager_category.manage_categories') }}" class="active">
+                <a href="{{ url_for('CategoryManagementUI.manage_categories') }}" class="active">
                     <i class="fas fa-list me-2"></i> Categories
                 </a>
                 
@@ -92,7 +92,7 @@
                     <h2>
                         {% if search_keyword %}
                         Search Results for "{{ search_keyword }}"
-                        <a href="{{ url_for('platformManager_category.manage_categories') }}" class="btn btn-sm btn-outline-secondary">
+                        <a href="{{ url_for('CategoryManagementUI.manage_categories') }}" class="btn btn-sm btn-outline-secondary">
                             <i class="fas fa-times"></i> Clear Search
                         </a>
                         {% else %}
@@ -100,7 +100,7 @@
                         {% endif %}
                     </h2>
                     <div class="header-actions">
-                        <a href="{{ url_for('platformManager_category.create_category') }}" class="btn btn-primary">
+                        <a href="{{ url_for('CategoryManagementUI.create_category') }}" class="btn btn-primary">
                             <i class="fas fa-plus me-2"></i> Create New Category
                         </a>
                     </div>
@@ -109,7 +109,7 @@
                 <div class="table-container">
                     <!-- Search Form -->
                     <div class="search-container">
-                        <form action="{{ url_for('platformManager_category.search_category') }}" method="POST">
+                        <form action="{{ url_for('CategoryManagementUI.search_category') }}" method="POST">
                             <div class="input-group mb-3">
                                 <input type="text" class="form-control" placeholder="Search by category name or description..." 
                                        name="keyword" id="searchQuery" value="{{ search_keyword }}">
@@ -146,27 +146,27 @@
                                     
                                     <td>{{ category.create_at.strftime('%Y-%m-%d') }}</td>
                                     <td>
-                                        <a href="{{ url_for('platformManager_category.edit_category', category_id=category.categoryID) }}" class="btn btn-sm btn-info" title="Edit">
+                                        <a href="{{ url_for('CategoryManagementUI.edit_category', category_id=category.categoryID) }}" class="btn btn-sm btn-info" title="Edit">
                                             <i class="fas fa-edit"></i>
                                         </a>
                                         
                                         {% if category.categoryStatus %}
                                         <!-- Suspend (Deactivate) button for active categories -->
-                                        <form action="{{ url_for('platformManager_category.suspend_category', category_id=category.categoryID) }}" method="post" style="display:inline;">
+                                        <form action="{{ url_for('CategoryManagementUI.suspend_category', category_id=category.categoryID) }}" method="post" style="display:inline;">
                                             <button type="submit" class="btn btn-sm btn-warning" onclick="return confirm('Are you sure you want to deactivate this category?')" title="Deactivate">
                                                 <i class="fa-solid fa-circle-pause"></i>
                                             </button>
                                         </form>
                                         {% else %}
                                         <!-- Reactivate button for inactive categories -->
-                                        <form action="{{ url_for('platformManager_category.reactivate_category', category_id=category.categoryID) }}" method="post" style="display:inline;">
+                                        <form action="{{ url_for('CategoryManagementUI.reactivate_category', category_id=category.categoryID) }}" method="post" style="display:inline;">
                                             <button type="submit" class="btn btn-sm btn-success" onclick="return confirm('Do you want to activate this category?')" title="Activate">
                                                 <i class="fa-solid fa-circle-play"></i>
                                             </button>
                                         </form>
                                         {% endif %}
                                         
-                                        <form action="{{ url_for('platformManager_category.delete_category', category_id=category.categoryID) }}" method="post" style="display:inline;">
+                                        <form action="{{ url_for('CategoryManagementUI.delete_category', category_id=category.categoryID) }}" method="post" style="display:inline;">
                                             <button type="submit" class="btn btn-sm btn-danger" onclick="return confirm('Are you sure you want to delete this category?')">
                                                 <i class="fa fa-trash"></i>
                                             </button>

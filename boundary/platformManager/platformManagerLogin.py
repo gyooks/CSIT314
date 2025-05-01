@@ -13,7 +13,7 @@ def platformManagerLogin():
         success, message = controller.login(email, password)
         if success:
             flash("Login successful!", "success")
-            return redirect(url_for('platformManager_category.manage_categories'))
+            return redirect(url_for('CategoryManagementUI.manage_categories'))
             
         else:
             flash(message,"danger")
