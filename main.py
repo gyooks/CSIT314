@@ -8,10 +8,10 @@ from boundary.admin.userAdminLogin import admin_login_bp
 from boundary.admin.userAdminLogout import admin_logout_bp 
 from boundary.admin.searchUserAcc import search_userAcc_bp
 from boundary.admin.suspendUserAcc import suspend_user_bp
-
 from boundary.admin.viewProfile import admin_profile_bp
 
-
+from boundary.platformManager.CategoryManagementBoundary import platformManager_category_bp
+from boundary.platformManager.platformManagerLogin import platformManager_login_bp 
 
 # Create Flask application
 app = Flask(__name__)
@@ -26,8 +26,10 @@ app.register_blueprint(admin_login_bp)
 app.register_blueprint(admin_logout_bp)
 app.register_blueprint(search_userAcc_bp)
 app.register_blueprint(suspend_user_bp)
-
 app.register_blueprint(admin_profile_bp)
+
+app.register_blueprint(platformManager_category_bp)
+app.register_blueprint(platformManager_login_bp)
 
 # Secret key for sessions and flash messages
 app.secret_key = 'your_secret_key_here'  # Change this to a secure key in production

@@ -13,3 +13,18 @@ def search_userAcc():
     keyword = ""
     results = []
     users = []
+    
+    # Check if it's a POST request (search form submitted)
+    if request.method == 'POST':
+        keyword = request.form.get('keyword', '')
+        if keyword:
+            # Get search results from controller
+            results = controller.search_userAcc(keyword)
+            
+            # Process results to get the user objects only
+            users = [user for user, _ in results]
+    
+    # Render the template with search results
+    return render_template('admin/dashboard.html', 
+                          users=users, 
+                          search_keyword=keyword)
