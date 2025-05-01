@@ -1,18 +1,8 @@
 from entity.UserAccount import User
 from db_config import db
 
-class viewUserAccController:
-    @staticmethod
-    def get_all_users():
-        """
-        Get all users from database
-        """
-        try:
-            users = User.get_all()
-            return [user.to_dict() for user in users]
-        except Exception as e:
-            return []
-    
+class deleteUserAccController:   
+
     @staticmethod
     def get_user_by_id(user_id):
         """
@@ -29,4 +19,11 @@ class viewUserAccController:
         except Exception as e:
             return None
         
+    @staticmethod
+    def delete_user(user_id):
+        user = User.find_by_id(user_id)
+        if user:
+            user.delete_from_db()
+            return True
+        return False
     

@@ -1,5 +1,7 @@
 from flask import Blueprint, render_template, request, redirect, url_for, flash, session
 from controller.admin.viewUserAccController import viewUserAccController
+from controller.admin.updateUserAccController import updateUserAccController
+from controller.admin.deleteUserAccController import deleteUserAccController
 
 # Create Admin Dashboard Blueprint
 admin_dashboard_bp = Blueprint('admin_dashboard', __name__, url_prefix='/admin')
@@ -23,7 +25,7 @@ def delete_user(target_user_id):
         return redirect(url_for('admin_login.userAdminLogin'))
     user_id = session['user_id']
 
-    if viewUserAccController.delete_user(target_user_id):
+    if deleteUserAccController.delete_user(target_user_id):
         flash('User deleted successfully.', 'success')
     else:
         flash('User could not be deleted.', 'danger')
@@ -37,7 +39,7 @@ def edit_user(target_user_id):
         return redirect(url_for('admin_login.userAdminLogin'))
     user_id = session['user_id']
         
-    user = viewUserAccController.get_user_by_id(target_user_id)
+    user = updateUserAccController.get_user_by_id(target_user_id)
 
     if not user:
         flash("User not found.", "danger")
@@ -49,7 +51,7 @@ def edit_user(target_user_id):
         role = request.form.get('role')
         isActive = bool(request.form.get('isActive'))
 
-        success = viewUserAccController.update_user(target_user_id, email, phone, role, isActive)
+        success = updateUserAccController.update_user(target_user_id, email, phone, role, isActive)
 
         if success:
             flash("User updated successfully!", "success")

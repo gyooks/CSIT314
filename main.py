@@ -3,7 +3,7 @@ from db_config import db, configure_db
 from entity.UserAccount import User
 from entity.UserProfile import UserProfile
 from boundary.admin.createUserAcc import create_user_bp
-from boundary.admin.viewUserAcc import admin_dashboard_bp 
+from boundary.admin.userAccManagementPage import admin_dashboard_bp 
 from boundary.admin.userAdminLogin import admin_login_bp 
 from boundary.admin.userAdminLogout import admin_logout_bp 
 from boundary.admin.searchUserAcc import search_userAcc_bp
