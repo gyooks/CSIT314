@@ -62,7 +62,7 @@ class viewCategoryController:
                 return False
                 
             # Convert status string to boolean
-            category_status = (status == 'Active')
+            category_status = (status == '1')
             
             category.update_in_db(name, description, category_status)
             return True
