@@ -20,7 +20,7 @@ class AdminProfileController:
                 'userID': user.userID,
                 'email': user.email,
                 'role': user.role,
-                'phone': user.phone,
+                'phone': None,
                 'first_name': None,
                 'last_name': None,
                 'address': None
@@ -32,7 +32,8 @@ class AdminProfileController:
                     'profile_id': profile.profile_id,
                     'first_name': profile.first_name,
                     'last_name': profile.last_name,
-                    'address': profile.address
+                    'address': profile.address,
+                    'phone': profile.phone
                 })
             
             return result

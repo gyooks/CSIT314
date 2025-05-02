@@ -103,7 +103,7 @@
                     <div class="search-container">
                         <form action="{{ url_for('search_userAcc.search_userAcc') }}" method="POST">
                             <div class="input-group mb-3">
-                                <input type="text" class="form-control" placeholder="Search by email, phone, or name..." 
+                                <input type="text" class="form-control" placeholder="Search by email" 
                                        name="keyword" id="searchQuery" value="{{ search_keyword }}">
                                 <button class="btn btn-outline-secondary" type="submit">
                                     <i class="fas fa-search"></i> Search
@@ -118,7 +118,7 @@
                                 <th>ID</th>
                                 <th>Email</th>
                                 <th>Role</th>
-                                <th>Phone</th>
+                                <th>Password</th>
                                 <th>Created Date</th>
                                 <th>Status</th>
                                 <th>Actions</th>
@@ -136,7 +136,7 @@
                                             {{ user.role }}
                                         </span>
                                     </td>
-                                    <td>{{ user.phone }}</td>
+                                    <td>{{ user.password }}</td>
                                     <td>{{ user.created_at.strftime('%Y-%m-%d') }}</td>
                                     <td>
                                         <span class="badge bg-{{ 'success' if user.isActive else 'danger' }}">

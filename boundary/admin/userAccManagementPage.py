@@ -47,11 +47,20 @@ def edit_user(target_user_id):
 
     if request.method == 'POST':
         email = request.form.get('email')
-        phone = request.form.get('phone')
         role = request.form.get('role')
+        password = request.form.get('password')
+        confirm_password = request.form.get('confirm_password')
         isActive = bool(request.form.get('isActive'))
 
-        success = updateUserAccController.update_user(target_user_id, email, phone, role, isActive)
+        if password:
+            if password != confirm_password:
+                flash("Passwords do not match.", "danger")
+                return redirect(url_for('admin_dashboard.edit_user', target_user_id=target_user_id))
+        else:
+            # If password is empty, don't change it
+            password = None
+
+        success = updateUserAccController.update_user(target_user_id, email, role, password, isActive)
 
         if success:
             flash("User updated successfully!", "success")
@@ -61,3 +70,5 @@ def edit_user(target_user_id):
         return redirect(url_for('admin_dashboard.dashboard'))
 
     return render_template('admin/edit_user.html', user=user)
+
+

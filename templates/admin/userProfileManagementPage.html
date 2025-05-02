@@ -84,11 +84,11 @@
                     <h2>
                         {% if search_keyword %}
                         Search Results for "{{ search_keyword }}"
-                        <a href="{{ url_for('admin_dashboard.dashboard') }}" class="btn btn-sm btn-outline-secondary">
+                        <a href="{{ url_for('profile_management.view_profile') }}" class="btn btn-sm btn-outline-secondary">
                             <i class="fas fa-times"></i> Clear Search
                         </a>
                         {% else %}
-                        User Account Management
+                        User Profile Management
                         {% endif %}
                     </h2>
                     <div class="header-actions">
@@ -101,9 +101,9 @@
                 <div class="table-container">
                     <!-- Search Form -->
                     <div class="search-container">
-                        <form action="{{ url_for('search_userAcc.search_userAcc') }}" method="POST">
+                        <form action="{{ url_for('profile_management.search_profile') }}" method="POST">
                             <div class="input-group mb-3">
-                                <input type="text" class="form-control" placeholder="Search by email" 
+                                <input type="text" class="form-control" placeholder="Search by name, address, phone..." 
                                        name="keyword" id="searchQuery" value="{{ search_keyword }}">
                                 <button class="btn btn-outline-secondary" type="submit">
                                     <i class="fas fa-search"></i> Search
@@ -116,56 +116,51 @@
                         <thead>
                             <tr>
                                 <th>ID</th>
-                                <th>Email</th>
-                                <th>Role</th>
-                                <th>Password</th>
-                                <th>Created Date</th>
+                                <th>First Name</th>
+                                <th>Last Name</th>
+                                <th>Phone</th>
+                                <th>Address</th>
                                 <th>Status</th>
                                 <th>Actions</th>
                             </tr>
                         </thead>
                         <tbody>
-                            {% if users %}
-                                {% for user in users %}
+                            {% if userprofiles %}
+                                {% for userprofile in userprofiles %}
                                 <tr>
-                                    <td>{{ user.userID }}</td>
-                                    <td>{{ user.email }}</td>
-
+                                    <td>{{ userprofile.profile_id }}</td>
+                                    <td>{{ userprofile.first_name }}</td>
+                                    <td>{{ userprofile.last_name }}</td>
+                                    <td>{{ userprofile.phone }}</td>
+                                    <td>{{ userprofile.address }}</td>
                                     <td>
-                                        <span class="badge bg-{{ 'primary' if user.role == 'User admin' else 'success' if user.role == 'Cleaner' else 'info' if user.role == 'Homeowner' else 'secondary' }}">
-                                            {{ user.role }}
-                                        </span>
-                                    </td>
-                                    <td>{{ user.password[:20] }}</td>
-                                    <td>{{ user.created_at.strftime('%Y-%m-%d') }}</td>
-                                    <td>
-                                        <span class="badge bg-{{ 'success' if user.isActive else 'danger' }}">
-                                            {{ 'Active' if user.isActive else 'Inactive' }}
+                                        <span class="badge bg-{{ 'success' if userprofile.isActive else 'danger' }}">
+                                            {{ 'Active' if userprofile.isActive else 'Inactive' }}
                                         </span>
                                     </td>
                                     <td>
-                                        <a href="{{ url_for('admin_dashboard.edit_user', target_user_id=user.userID) }}" class="btn btn-sm btn-info" title="Edit">
+                                        <a href="{{ url_for('profile_management.update_profile', profile_id=userprofile.profile_id) }}" class="btn btn-sm btn-info" title="Edit">
                                             <i class="fas fa-edit"></i>
                                         </a>
                                         
-                                        {% if user.isActive %}
+                                        {% if userprofile.isActive %}
                                         <!-- Suspend button for active users -->
-                                        <form action="{{ url_for('suspend_user.suspend_user', target_user_id=user.userID) }}" method="post" style="display:inline;">
-                                            <button type="submit" class="btn btn-sm btn-warning" onclick="return confirm('Are you sure you want to suspend this user?')" title="Suspend">
+                                        <form action="{{ url_for('profile_management.suspend_profile', profile_id=userprofile.profile_id) }}" method="post" style="display:inline;">
+                                            <button type="submit" class="btn btn-sm btn-warning" onclick="return confirm('Are you sure you want to suspend this profile?')" title="Suspend">
                                                 <i class="fa-solid fa-circle-pause"></i>
                                             </button>
                                         </form>
                                         {% else %}
                                         <!-- Reactivate button for suspended users -->
-                                        <form action="{{ url_for('suspend_user.reactivate_user', target_user_id=user.userID) }}" method="post" style="display:inline;">
-                                            <button type="submit" class="btn btn-sm btn-success" onclick="return confirm('Do you want to reactivate this user?')" title="Reactivate">
+                                        <form action="{{ url_for('profile_management.reactivate_profile', profile_id=userprofile.profile_id) }}" method="post" style="display:inline;">
+                                            <button type="submit" class="btn btn-sm btn-success" onclick="return confirm('Do you want to reactivate this profile?')" title="Reactivate">
                                                 <i class="fa-solid fa-circle-play"></i>
                                             </button>
                                         </form>
                                         {% endif %}
                                         
-                                        <form action="{{ url_for('admin_dashboard.delete_user', target_user_id=user.userID) }}" method="post" style="display:inline;">
-                                            <button type="submit" class="btn btn-sm btn-danger" onclick="return confirm('Are you sure you want to delete this user?')">
+                                        <form action="{{ url_for('profile_management.delete_profile', profile_id=userprofile.profile_id) }}" method="post" style="display:inline;">
+                                            <button type="submit" class="btn btn-sm btn-danger" onclick="return confirm('Are you sure you want to delete this profile?')">
                                                 <i class="fa fa-trash"></i>
                                             </button>
                                         </form>
@@ -176,9 +171,9 @@
                                 <tr>
                                     <td colspan="7" class="text-center">
                                         {% if search_keyword %}
-                                            No users found matching "{{ search_keyword }}"
+                                            No profiles found matching "{{ search_keyword }}"
                                         {% else %}
-                                            No users found
+                                            No profiles found
                                         {% endif %}
                                     </td>
                                 </tr>

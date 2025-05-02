@@ -19,8 +19,9 @@ class updateUserAccController:
         except Exception as e:
             return None
 
+
     @staticmethod
-    def update_user(user_id, email, phone, role, is_active):
+    def update_user(user_id, email, role, password, is_active):
         """
         Update user attributes
         """
@@ -29,7 +30,8 @@ class updateUserAccController:
             if not user:
                 return False
 
-            user.update_in_db(email, phone, role, is_active)
+            user.update_in_db(email, role, password, is_active)
+
             return True
         except Exception as e:
             print(f"Error updating user: {e}")

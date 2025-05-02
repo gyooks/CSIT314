@@ -1,5 +1,6 @@
 from flask import Blueprint, render_template, request, redirect, url_for, flash, session
 from controller.admin.createUserAccController import createUserAccController
+from controller.admin.createUserProfileController import createUserProfileController
 
 # Create User Account Blueprint
 create_user_bp = Blueprint('create_user', __name__, url_prefix='/admin')
@@ -33,23 +34,37 @@ def create_user():
             flash('Passwords do not match', 'error')
             return render_template('admin/createUserAccPage.html')
         
-        # Create user
-        success, message = createUserAccController.create_user(
+        # Step 1: Create user account
+        success, message, new_user_id = createUserAccController.create_user(
             email=email,
             password=password,
-            role=role,
-            phone=phone,
-            first_name=first_name,
-            last_name=last_name,
-            address=address
+            role=role
         )
         
-        if success:
-            flash(message, 'success')
-            return redirect(url_for('admin_dashboard.dashboard'))  # Updated to use new blueprint name
-        else:
+        if not success:
             flash(message, 'error')
             return render_template('admin/createUserAccPage.html')
+        
+        # Step 2: Create user profile if account creation was successful
+        if first_name or last_name:
+            profile_success, profile_message = createUserProfileController.create_profile(
+                user_id=new_user_id,
+                first_name=first_name,
+                last_name=last_name,
+                address=address,
+                phone=phone
+            )
+            
+            if not profile_success:
+                # Profile creation failed, but account already created
+                flash(f"Account created but profile creation failed: {profile_message}", 'warning')
+                return redirect(url_for('admin_dashboard.dashboard'))
+                
+            flash("User created successfully", 'success')
+        else:
+            flash("User account created successfully", 'success')
+            
+        return redirect(url_for('admin_dashboard.dashboard'))
     
     # GET request - show the form
     return render_template('admin/createUserAccPage.html')

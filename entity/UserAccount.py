@@ -10,7 +10,6 @@ class User(db.Model):
     email = db.Column(db.String(100), nullable=False)
     password = db.Column(db.String(100))
     role = db.Column(db.String(50))
-    phone = db.Column(db.String(20))
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
     isActive = db.Column(db.Boolean, default=True)
     
@@ -24,26 +23,24 @@ class User(db.Model):
     )
     
     # Constructor: initializes the object with given values
-    def __init__(self, email, password, role, phone=None):
+    def __init__(self, email, password, role):
         self.email = email
         self.password = password  # In a real application, you'd hash this password
         self.role = role
-        self.phone = phone
     
     # Converts object into a dictionary format
     def to_dict(self):
         return {
             'userID': self.userID,
             'email': self.email,
+            'password': self.password,
             'role': self.role,
-            'phone': self.phone,
             'created_at': self.created_at,
             'isActive': self.isActive
         }
 
     def verify_password(self, password):
-        #return check_password_hash(self.password, password) 
-        return self.password == password
+        return check_password_hash(self.password, password)
     
     # Database operations - moved from controllers to entity
     @classmethod
@@ -72,26 +69,36 @@ class User(db.Model):
         ).filter(
             or_(
                 cls.email.ilike(f'%{keyword}%'),
-                cls.phone.ilike(f'%{keyword}%'),
             )
         ).all()
     
     def save_to_db(self):
         """Save user to database"""
-        db.session.add(self)
-        db.session.commit()
+        try:
+            db.session.add(self)
+            db.session.commit()
+            return True
+        except Exception as e:
+            db.session.rollback()
+            raise e
     
     def delete_from_db(self):
         """Delete user from database"""
         db.session.delete(self)
         db.session.commit()
         
-    def update_in_db(self, email, phone, role, is_active):
-        """Update user attributes"""
+    def update_in_db(self, email, role, password, is_active):
+        """Update user attributes, including password"""
         self.email = email
-        self.phone = phone
         self.role = role
+
+        # Only update password if a new one is provided (and hashed)
+        if password:
+            self.password = generate_password_hash(password)
+
         self.isActive = is_active
+
+
         db.session.commit()
         return True
         

@@ -2,13 +2,14 @@ from flask import Flask, redirect, url_for, render_template
 from db_config import db, configure_db
 from entity.UserAccount import User
 from entity.UserProfile import UserProfile
-from boundary.admin.createUserAcc import create_user_bp
+from boundary.admin.createNewUser import create_user_bp
 from boundary.admin.userAccManagementPage import admin_dashboard_bp 
 from boundary.admin.userAdminLogin import admin_login_bp 
 from boundary.admin.userAdminLogout import admin_logout_bp 
 from boundary.admin.searchUserAcc import search_userAcc_bp
 from boundary.admin.suspendUserAcc import suspend_user_bp
 from boundary.admin.viewProfile import admin_profile_bp
+from boundary.admin.UserProfileManagementPage import profile_management_bp
 
 from boundary.platformManager.CategoryManagementBoundary import CategoryManagementUI_bp
 from boundary.platformManager.platformManagerLogin import platformManager_login_bp 
@@ -28,6 +29,7 @@ app.register_blueprint(admin_logout_bp)
 app.register_blueprint(search_userAcc_bp)
 app.register_blueprint(suspend_user_bp)
 app.register_blueprint(admin_profile_bp)
+app.register_blueprint(profile_management_bp)
 
 app.register_blueprint(CategoryManagementUI_bp)
 app.register_blueprint(reportManagementUI_bp)
