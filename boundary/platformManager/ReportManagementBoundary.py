@@ -1,6 +1,6 @@
 from flask import Blueprint, render_template, request, redirect, url_for, flash, session, jsonify
 from entity.Report import Report
-from controller.platformManager.generateReportController import (
+from controller.platformManager.GenerateReportController import (
     GenerateDailyReportController,
     GenerateWeeklyReportController,
     GenerateMonthlyReportController

@@ -1,0 +1,23 @@
+from entity.UserAccount import User
+from flask import session
+
+class LoginController:
+    def login(self, email, password):
+        user = User.query.filter_by(email=email).first()
+        
+        if not user:
+            return False, "Incorrect User or Password"
+            
+        # Check if user account is inactive
+        if not user.isActive:
+            return False, "Account is inactive. Please contact an administrator."
+        
+        # Check if user is an admin
+        if user.role != "Platform manger":
+            return False, "Access denied. Only platform managers can login here."
+            
+        if user.verify_password(password):
+            session['user_id'] = user.userID #save login state
+            return True, "Login successful"
+            
+        return False, "Incorrect User or Password"
