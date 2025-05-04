@@ -1,7 +1,6 @@
 from flask import Blueprint, render_template, request, redirect, url_for, flash, session
 from controller.cleaner.viewCleaningServiceController import viewCleaningServiceController
 from controller.cleaner.createCleaningServiceController import createCleaningServiceController
-from controller.cleaner.deleteCleaningServiceController import deleteCleaningServiceController
 from controller.cleaner.searchCleaningServiceController import searchCleaningServiceController
 from controller.cleaner.suspendCleaningServiceController import suspendCleaningServiceController
 from controller.cleaner.updateCleaningServiceController import updateCleaningServiceController
@@ -150,33 +149,7 @@ def edit_service(service_id):
     
     return redirect(url_for('CleaningServiceManagementUI.manage_services'))
 
-# Delete Service
-@CleaningServiceManagementUI_bp.route('/services/delete/<int:service_id>', methods=['POST'])
-def delete_service(service_id):
-    """
-    Delete a service
-    """
-    if 'user_id' not in session:
-        flash("You must be logged in to perform this action", "danger")
-        return redirect(url_for('cleaner_login.cleanerLogin'))
-    
-    cleaner_id = session['user_id']
-    
-    # Verify ownership before deletion
-    service = updateCleaningServiceController.get_service_by_id(service_id)
-    if not service or service.cleanerID != cleaner_id:
-        flash("You do not have permission to delete this service.", "danger")
-        return redirect(url_for('CleaningServiceManagementUI.manage_services'))
-    
-    # Delete service
-    success = deleteCleaningServiceController.delete_service(service_id)
-    
-    if success:
-        flash("Service deleted successfully.", "success")
-    else:
-        flash("Failed to delete service.", "danger")
-    
-    return redirect(url_for('CleaningServiceManagementUI.manage_services'))
+
 
 # Suspend Service
 @CleaningServiceManagementUI_bp.route('/services/suspend/<int:service_id>', methods=['POST'])

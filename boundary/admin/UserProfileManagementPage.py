@@ -3,7 +3,6 @@ from controller.admin.viewUserProfileController import viewUserProfileController
 from controller.admin.searchUserProfileController import SearchProfileController
 from controller.admin.suspendUserProfileController import SuspendProfileController
 from controller.admin.updateUserProfileController import UpdateProfileController
-from controller.admin.deleteUserProfileController import DeleteProfileController
 
 # Create a single blueprint for all profile management routes
 profile_management_bp = Blueprint('profile_management', __name__, url_prefix='/profile')

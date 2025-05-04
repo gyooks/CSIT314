@@ -1,7 +1,6 @@
 from flask import Blueprint, render_template, request, redirect, url_for, flash, session
 from controller.platformManager.viewCategoryController import viewCategoryController
 from controller.platformManager.createCategoryController import createCategoryController
-from controller.platformManager.deleteCategoryController import deleteCategoryController
 from controller.platformManager.searchCategoryController import searchCategoryController
 from controller.platformManager.suspendCategoryController import suspendCategoryController
 from controller.platformManager.updateCategoryController import updateCategoryController
@@ -117,25 +116,7 @@ def edit_category(category_id):
     
     return redirect(url_for('CategoryManagementUI.manage_categories'))
 
-# Delete Category
-@CategoryManagementUI_bp.route('/categories/delete/<int:category_id>', methods=['POST'])
-def delete_category(category_id):
-    """
-    Delete a category
-    """
-    # if 'user_id' not in session:
-    #     flash("You must be logged in to perform this action", "danger")
-    #     return redirect(url_for('platform_manager_login.userManagerLogin'))
-    
-    # Delete category
-    success = deleteCategoryController.delete_category(category_id)
-    
-    if success:
-        flash("Category deleted successfully.", "success")
-    else:
-        flash("Failed to delete category.", "danger")
-    
-    return redirect(url_for('CategoryManagementUI.manage_categories'))
+
 
 
 
