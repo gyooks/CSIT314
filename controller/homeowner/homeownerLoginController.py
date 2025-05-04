@@ -13,8 +13,8 @@ class LoginController:
             return False, "Account is inactive. Please contact an administrator."
         
         # Check if user is an admin
-        if user.role != "Platform manager":
-            return False, "Access denied. Only Platform Manager can login here."
+        if user.role != "Homeowner":
+            return False, "Access denied. Only homeowner can login here."
             
         if user.verify_password(password):
             session['user_id'] = user.userID #save login state

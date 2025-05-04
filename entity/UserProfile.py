@@ -5,7 +5,7 @@ class UserProfile(db.Model):
     __tablename__ = 'userprofiles'
     
     profile_id = db.Column(db.Integer, primary_key=True, autoincrement=True)
-    user_id = db.Column(db.Integer, db.ForeignKey('users.userID'))
+    user_id = db.Column(db.Integer, db.ForeignKey('USERS.userID'))
     first_name = db.Column(db.String(100))
     last_name = db.Column(db.String(100))
     address = db.Column(db.String(255))

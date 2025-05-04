@@ -15,6 +15,16 @@ from boundary.platformManager.CategoryManagementBoundary import CategoryManageme
 from boundary.platformManager.platformManagerLogin import platformManager_login_bp 
 from boundary.platformManager.ReportManagementBoundary import reportManagementUI_bp 
 from boundary.platformManager.platformManagerLogout import platformManager_logout_bp
+
+from boundary.cleaner.cleaningServiceBoundary import CleaningServiceManagementUI_bp
+from boundary.cleaner.bookingManagementBoundary import BookingManagementUI_bp
+from boundary.cleaner.cleanerLogin import cleaner_login_bp 
+
+from boundary.homeowner.viewCleanerServicePage import CleanerServiceManagementUI_bp
+from boundary.homeowner.viewBookingPage import viewBookingPage_bp
+from boundary.homeowner.viewShortlistPage import viewShortlistPage_bp
+from boundary.homeowner.homeownerLogin import homeowner_login_bp
+
 # Create Flask application
 app = Flask(__name__)
 
@@ -35,6 +45,15 @@ app.register_blueprint(CategoryManagementUI_bp)
 app.register_blueprint(reportManagementUI_bp)
 app.register_blueprint(platformManager_login_bp)
 app.register_blueprint(platformManager_logout_bp)
+
+app.register_blueprint(CleaningServiceManagementUI_bp)
+app.register_blueprint(BookingManagementUI_bp)
+app.register_blueprint(cleaner_login_bp)
+
+app.register_blueprint(CleanerServiceManagementUI_bp)
+app.register_blueprint(viewBookingPage_bp)
+app.register_blueprint(viewShortlistPage_bp)
+app.register_blueprint(homeowner_login_bp)
 
 # Secret key for sessions and flash messages
 app.secret_key = 'your_secret_key_here'  # Change this to a secure key in production

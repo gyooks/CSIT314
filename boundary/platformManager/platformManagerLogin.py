@@ -1,5 +1,5 @@
 from flask import Blueprint, render_template, request, redirect, url_for, flash
-from controller.platformManager.managerLoginController import LoginController
+from controller.platformManager.platformManagerLoginController import LoginController
 
 platformManager_login_bp = Blueprint('platformManager_login', __name__, url_prefix='/PMlogin')
 

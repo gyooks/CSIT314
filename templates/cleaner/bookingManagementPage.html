@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Bookings - Cleaner Dashboard</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+
+    <style>
+        .sidebar {
+            min-height: 100vh;
+            background-color: #343a40;
+            color: white;
+        }
+        .sidebar a {
+            color: #ced4da;
+            text-decoration: none;
+            display: block;
+            padding: 10px 15px;
+        }
+        .sidebar a:hover {
+            background-color: #495057;
+            color: white;
+        }
+        .sidebar a.active {
+            background-color: #0d6efd;
+            color: white;
+        }
+        .main-content {
+            padding: 20px;
+        }
+        .table-container {
+            background-color: white;
+            border-radius: 5px;
+            padding: 20px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+        }
+        .search-container {
+            margin-bottom: 20px;
+        }
+        .header-actions {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .price {
+            font-weight: bold;
+            color: #28a745;
+        }
+        .badge-pending {
+            background-color: #ffc107;
+            color: #212529;
+        }
+        .badge-confirmed {
+            background-color: #0d6efd;
+            color: white;
+        }
+        .badge-completed {
+            background-color: #28a745;
+            color: white;
+        }
+        .badge-cancelled {
+            background-color: #dc3545;
+            color: white;
+        }
+        .status-filter {
+            margin-bottom: 20px;
+        }
+        .status-filter .btn {
+            margin-right: 5px;
+        }
+        .booking-details {
+            margin-bottom: 15px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container-fluid">
+        <div class="row">
+            <!-- Sidebar -->
+            <div class="col-md-2 p-0 sidebar">
+                <div class="p-3">
+                    <h4>Cleaner Dashboard</h4>
+                </div>
+                  
+                <a href="{{ url_for('CleaningServiceManagementUI.manage_services') }}">
+                    <i class="fas fa-broom me-2"></i> My Services
+                </a>
+                
+                <a href="{{ url_for('BookingManagementUI.manage_bookings') }}" class="active">
+                    <i class="fas fa-calendar me-2"></i> My Bookings
+                </a>
+                
+                <a href="#">
+                    <i class="fas fa-sign-out-alt me-2"></i> Logout
+                </a>
+            </div>
+            
+            <!-- Main Content -->
+            <div class="col-md-10 main-content">
+                <!-- Flash messages -->
+                {% with messages = get_flashed_messages(with_categories=true) %}
+                    {% if messages %}
+                        {% for category, message in messages %}
+                            <div class="alert alert-{{ category if category != 'error' else 'danger' }}" role="alert">
+                                {{ message }}
+                            </div>
+                        {% endfor %}
+                    {% endif %}
+                {% endwith %}
+                
+                <div class="d-flex justify-content-between align-items-center mb-4">
+                    <h2>My Bookings</h2>
+                </div>
+                
+                <div class="table-container">
+                    <!-- Status Filter -->
+                    <div class="status-filter">
+                        <div class="d-flex align-items-center mb-3">
+                            <label class="me-2"><strong>Filter by Status:</strong></label>
+                            <a href="{{ url_for('BookingManagementUI.manage_bookings') }}" 
+                               class="btn btn-sm {{ 'btn-primary' if not current_status else 'btn-outline-primary' }}">All</a>
+                            <a href="{{ url_for('BookingManagementUI.manage_bookings', status='Pending') }}" 
+                               class="btn btn-sm {{ 'btn-warning' if current_status == 'Pending' else 'btn-outline-warning' }}">Pending</a>
+                            <a href="{{ url_for('BookingManagementUI.manage_bookings', status='Confirmed') }}" 
+                               class="btn btn-sm {{ 'btn-info' if current_status == 'Confirmed' else 'btn-outline-info' }}">Confirmed</a>
+                            <a href="{{ url_for('BookingManagementUI.manage_bookings', status='Completed') }}" 
+                               class="btn btn-sm {{ 'btn-success' if current_status == 'Completed' else 'btn-outline-success' }}">Completed</a>
+                            <a href="{{ url_for('BookingManagementUI.manage_bookings', status='Cancelled') }}" 
+                               class="btn btn-sm {{ 'btn-danger' if current_status == 'Cancelled' else 'btn-outline-danger' }}">Cancelled</a>
+                        </div>
+                    </div>
+
+                    <table class="table table-striped">
+                        <thead>
+                            <tr>
+                                <th>#</th>
+                                <th>Homeowner</th>
+                                <th>Contact Info</th>
+                                <th>Service</th>
+                                <th>Date</th>
+                                <th>Hours</th>
+                                <th>Total Price</th>
+                                <th>Status</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% if bookings %}
+                                {% for booking, user, profile, service in bookings %}
+                                <tr>
+                                    <td>{{ loop.index }}</td>
+                                    <td>{{ profile.first_name }} {{ profile.last_name }}</td>
+                                    <td>
+                                        <div><i class="fas fa-phone me-1"></i> {{ profile.phone }}</div>
+                                        <div><i class="fas fa-map-marker-alt me-1"></i> {{ profile.address }}</div>
+                                    </td>
+                                    <td><strong>{{ service.title }}</strong></td>
+                                    <td>{{ booking.bookingDate.strftime('%Y-%m-%d') }}</td>
+                                    <td class="text-center">{{ booking.bookingHour}}</td>
+                                    <td class="price">${{ "%.2f"|format(booking.totalPrice) }}</td>
+                                    <td>
+                                        <span class="badge 
+                                            {% if booking.bookingStatus == 'Pending' %}badge-pending
+                                            {% elif booking.bookingStatus == 'Confirmed' %}badge-confirmed
+                                            {% elif booking.bookingStatus == 'Completed' %}badge-completed
+                                            {% elif booking.bookingStatus == 'Cancelled' %}badge-cancelled
+                                            {% endif %}">
+                                            {{ booking.bookingStatus }}
+                                        </span>
+                                    </td>
+                                    <td>
+                                        <button type="button" class="btn btn-sm btn-primary" data-bs-toggle="modal" data-bs-target="#editStatusModal{{ booking.bookingID }}">
+                                            <i class="fas fa-edit"></i>
+                                        </button>
+                                        
+                                        <!-- Edit Status Modal -->
+                                        <div class="modal fade" id="editStatusModal{{ booking.bookingID }}" tabindex="-1" aria-labelledby="editStatusModalLabel{{ booking.bookingID }}" aria-hidden="true">
+                                            <div class="modal-dialog">
+                                                <div class="modal-content">
+                                                    <div class="modal-header">
+                                                        <h5 class="modal-title" id="editStatusModalLabel{{ booking.bookingID }}">Update Booking Status</h5>
+                                                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                                    </div>
+                                                    <div class="modal-body">
+                                                        <div class="booking-details">
+                                                            <p><strong>Booking ID:</strong> {{ booking.bookingID }}</p>
+                                                            <p><strong>Homeowner:</strong> {{ profile.first_name }} {{ profile.last_name }}</p>
+                                                            <p><strong>Service:</strong> {{ service.title }}</p>
+                                                            <p><strong>Date:</strong> {{ booking.bookingDate.strftime('%Y-%m-%d') }}</p>
+                                                            <p><strong>Current Status:</strong> {{ booking.bookingStatus }}</p>
+                                                        </div>
+                                                        
+                                                        <form action="{{ url_for('BookingManagementUI.update_booking_status', booking_id=booking.bookingID) }}" method="post">
+                                                            <div class="mb-3">
+                                                                <label for="statusSelect{{ booking.bookingID }}" class="form-label">New Status</label>
+                                                                <select class="form-select" id="statusSelect{{ booking.bookingID }}" name="status" required>
+                                                                    <option value="">Select a status</option>
+                                                                    <option value="Pending" {% if booking.bookingStatus == 'Pending' %}selected{% endif %}>Pending</option>
+                                                                    <option value="Confirmed" {% if booking.bookingStatus == 'Confirmed' %}selected{% endif %}>Confirmed</option>
+                                                                    <option value="Completed" {% if booking.bookingStatus == 'Completed' %}selected{% endif %}>Completed</option>
+                                                                    <option value="Cancelled" {% if booking.bookingStatus == 'Cancelled' %}selected{% endif %}>Cancelled</option>
+                                                                </select>
+                                                            </div>
+                                                            <div class="d-grid">
+                                                                <button type="submit" class="btn btn-primary">Update Status</button>
+                                                            </div>
+                                                        </form>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            {% else %}
+                                <tr>
+                                    <td colspan="8" class="text-center">
+                                        {% if current_status %}
+                                            No bookings with status "{{ current_status }}" found
+                                        {% else %}
+                                            You don't have any bookings yet
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                            {% endif %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

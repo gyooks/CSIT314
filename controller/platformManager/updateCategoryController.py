@@ -13,7 +13,7 @@ class updateCategoryController:
                 return False
                 
             # Convert status string to boolean
-            category_status = (status == '1')
+            category_status = category.categoryStatus
             
             category.update_in_db(name, description, category_status)
             return True
