@@ -60,5 +60,12 @@ app.secret_key = 'your_secret_key_here'  # Change this to a secure key in produc
 def index():
     return render_template('index.html')
 
+@app.after_request
+def add_header(response):
+    response.headers['Cache-Control'] = 'no-store, no-cache, must-revalidate, post-check=0, pre-check=0, max-age=0'
+    response.headers['Pragma'] = 'no-cache'
+    response.headers['Expires'] = '0'
+    return response
+
 if __name__ == '__main__':
     app.run(debug=True)
