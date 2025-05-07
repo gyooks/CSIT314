@@ -24,6 +24,7 @@ from boundary.homeowner.viewCleanerServicePage import CleanerServiceManagementUI
 from boundary.homeowner.viewBookingPage import viewBookingPage_bp
 from boundary.homeowner.viewShortlistPage import viewShortlistPage_bp
 from boundary.homeowner.homeownerLogin import homeowner_login_bp
+from boundary.homeowner.homeownerLogout import homeowner_logout_bp
 
 # Create Flask application
 app = Flask(__name__)
@@ -54,6 +55,7 @@ app.register_blueprint(CleanerServiceManagementUI_bp)
 app.register_blueprint(viewBookingPage_bp)
 app.register_blueprint(viewShortlistPage_bp)
 app.register_blueprint(homeowner_login_bp)
+app.register_blueprint(homeowner_logout_bp)
 
 # Secret key for sessions and flash messages
 app.secret_key = 'your_secret_key_here'  # Change this to a secure key in production
