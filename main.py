@@ -18,6 +18,7 @@ from boundary.platformManager.platformManagerLogout import platformManager_logou
 from boundary.cleaner.cleaningServiceBoundary import CleaningServiceManagementUI_bp
 from boundary.cleaner.bookingManagementBoundary import BookingManagementUI_bp
 from boundary.cleaner.cleanerLogin import cleaner_login_bp 
+from boundary.cleaner.cleanerLogout import cleaner_logout_bp
 
 from boundary.homeowner.viewCleanerServicePage import CleanerServiceManagementUI_bp
 from boundary.homeowner.viewBookingPage import viewBookingPage_bp
@@ -47,6 +48,7 @@ app.register_blueprint(platformManager_logout_bp)
 app.register_blueprint(CleaningServiceManagementUI_bp)
 app.register_blueprint(BookingManagementUI_bp)
 app.register_blueprint(cleaner_login_bp)
+app.register_blueprint(cleaner_logout_bp)
 
 app.register_blueprint(CleanerServiceManagementUI_bp)
 app.register_blueprint(viewBookingPage_bp)
