@@ -1,4 +1,3 @@
-from werkzeug.security import check_password_hash, generate_password_hash
 from datetime import datetime
 from db_config import db
 
@@ -8,41 +7,56 @@ class User(db.Model):
     
     userID = db.Column(db.Integer, primary_key=True, autoincrement=True)
     email = db.Column(db.String(100), nullable=False)
-    password = db.Column(db.String(100))
-    role = db.Column(db.String(50))
+    password = db.Column(db.String(256))
+    role_id = db.Column(db.Integer, db.ForeignKey('USERPROFILE.role_id'))
+    first_name = db.Column(db.String(100))
+    last_name = db.Column(db.String(100))
+    address = db.Column(db.String(255))
+    phone = db.Column(db.String(20))
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
     isActive = db.Column(db.Boolean, default=True)
     
-    # Relationship with UserProfile
-    profile = db.relationship(
-        'UserProfile',
-        backref='user',
-        lazy=True,
-        uselist=False,
-        foreign_keys='UserProfile.user_id'  
-    )
-    
     # Constructor: initializes the object with given values
-    def __init__(self, email, password, role):
+    def __init__(self, email, password, role_id, first_name=None, last_name=None, 
+                 address=None, phone=None):
         self.email = email
-        self.password = password  # In a real application, you'd hash this password
-        self.role = role
+        self.password = password  # Now stored as plain text
+        self.role_id = role_id
+        self.first_name = first_name
+        self.last_name = last_name
+        self.address = address
+        self.phone = phone
     
     # Converts object into a dictionary format
     def to_dict(self):
-        return {
+        """Converts object into a dictionary format with role name included"""
+        user_dict = {
             'userID': self.userID,
             'email': self.email,
-            'password': self.password,
-            'role': self.role,
+            'role_id': self.role_id,
+            'first_name': self.first_name,
+            'last_name': self.last_name,
+            'address': self.address,
+            'phone': self.phone,
             'created_at': self.created_at,
             'isActive': self.isActive
         }
+        
+        # Always include role name
+        if hasattr(self, 'profile') and self.profile:
+            user_dict['role_name'] = self.profile.role_name
+            # Create a profile dictionary to match the template's expectations
+            user_dict['profile'] = {
+                'role_name': self.profile.role_name
+            }
+        
+        return user_dict
 
     def verify_password(self, password):
-        return check_password_hash(self.password, password)
+        # Direct string comparison instead of hash verification
+        return self.password == password
     
-    # Database operations - moved from controllers to entity
+    # Database operations
     @classmethod
     def find_by_email(cls, email):
         """Find a user by email"""
@@ -50,27 +64,47 @@ class User(db.Model):
     
     @classmethod
     def find_by_id(cls, user_id):
-        """Find a user by ID"""
-        return cls.query.get(user_id)
+        """Find a user by ID with eager loading of profile"""
+        return cls.query.options(db.joinedload(cls.profile)).get(user_id)
     
     @classmethod
     def get_all(cls):
-        """Get all users"""
-        return cls.query.all()
+        """Get all users with eager loading of profiles"""
+        return cls.query.options(db.joinedload(cls.profile)).all()
+    
     
     @classmethod
-    def search_with_profiles(cls, keyword):
+    def search_users(cls, keyword):
         """Search users by keyword and join with profiles"""
         from sqlalchemy import or_
         from entity.UserProfile import UserProfile
         
-        return db.session.query(cls, UserProfile).outerjoin(
-            UserProfile, cls.userID == UserProfile.user_id
+        query = db.session.query(cls).join(
+            UserProfile, cls.role_id == UserProfile.role_id
         ).filter(
             or_(
                 cls.email.ilike(f'%{keyword}%'),
+                UserProfile.role_name.ilike(f'%{keyword}%'),
+                cls.first_name.ilike(f'%{keyword}%'),
+                cls.last_name.ilike(f'%{keyword}%'),
+                cls.address.ilike(f'%{keyword}%'),
+                cls.phone.ilike(f'%{keyword}%')
             )
-        ).all()
+        )
+        
+        return query.all()
+    
+    @classmethod
+    def get_users_by_role(cls, role_id):
+        """Get all users with a specific role"""
+        return cls.query.filter_by(role_id=role_id).all()
+    
+    @staticmethod
+    def get_role_id_by_name(role_name):
+        """Utility method to get role_id from role_name"""
+        from entity.UserProfile import UserProfile
+        profile = UserProfile.find_by_name(role_name)
+        return profile.role_id if profile else None
     
     def save_to_db(self):
         """Save user to database"""
@@ -82,22 +116,25 @@ class User(db.Model):
             db.session.rollback()
             raise e
     
-    def delete_from_db(self):
-        """Delete user from database"""
-        db.session.delete(self)
-        db.session.commit()
-        
-    def update_in_db(self, email, role, password, is_active):
-        """Update user attributes, including password"""
-        self.email = email
-        self.role = role
-
-        # Only update password if a new one is provided (and hashed)
-        if password:
-            self.password = generate_password_hash(password)
-
-        self.isActive = is_active
-
+    def update_in_db(self, email=None, role_id=None, password=None, 
+                    first_name=None, last_name=None, address=None, 
+                    phone=None):
+        """Update user attributes"""
+        if email is not None:
+            self.email = email
+        if role_id is not None:
+            self.role_id = role_id
+        if password is not None and password.strip() != '':
+            # Only update password if not empty
+            self.password = password  # Store password as plain text
+        if first_name is not None:
+            self.first_name = first_name
+        if last_name is not None:
+            self.last_name = last_name
+        if address is not None:
+            self.address = address
+        if phone is not None:
+            self.phone = phone
 
         db.session.commit()
         return True
@@ -113,3 +150,25 @@ class User(db.Model):
         self.isActive = True
         db.session.commit()
         return True
+        
+    @classmethod
+    def search_by_name(cls, name_query):
+        """Search users by first or last name"""
+        from sqlalchemy import or_
+        return cls.query.filter(
+            or_(
+                cls.first_name.ilike(f'%{name_query}%'),
+                cls.last_name.ilike(f'%{name_query}%')
+            )
+        ).all()
+        
+    @classmethod
+    def search_by_role(cls, role_name):
+        """Search users by role name"""
+        from entity.UserProfile import UserProfile
+        
+        return cls.query.join(
+            UserProfile, cls.role_id == UserProfile.role_id
+        ).filter(
+            UserProfile.role_name.ilike(f'%{role_name}%')
+        ).all()

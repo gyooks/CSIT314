@@ -1,9 +1,6 @@
 from datetime import datetime
 from db_config import db
 from sqlalchemy import or_, and_
-from entity.UserAccount import User
-from entity.Category import Category
-from entity.UserProfile import UserProfile
 
 class CleaningService(db.Model):
     __tablename__ = 'CLEANINGSERVICE'
@@ -17,12 +14,19 @@ class CleaningService(db.Model):
     serviceStatus = db.Column(db.Boolean, default=True)
     create_at = db.Column(db.DateTime, default=datetime.utcnow)
     
-    # Define the relationship with Category
+    # Define relationships
     category = db.relationship(
         'Category',
         backref=db.backref('services', lazy=True),
         lazy='joined',  
         foreign_keys=[categoryID]
+    )
+    
+    cleaner = db.relationship(
+        'User',
+        backref=db.backref('services', lazy=True),
+        lazy='joined',
+        foreign_keys=[cleanerID]
     )
     
     def __init__(self, cleanerID, categoryID, title, description, price):
@@ -70,19 +74,20 @@ class CleaningService(db.Model):
         Get all active cleaning services with cleaner info for homeowner view
         
         Returns:
-            list: List of tuples containing (service, cleaner, cleaner_profile, category)
+            list: List of tuples containing (service, cleaner, category)
         """
         try:
-            # Query active services with cleaner, profile, and category data
+            from entity.UserAccount import User
+            from entity.Category import Category
+            
+            # Query active services with cleaner and category data
             results = (
                 db.session.query(
                     cls,
                     User,
-                    UserProfile,
                     Category
                 )
                 .join(User, cls.cleanerID == User.userID)
-                .join(UserProfile, User.userID == UserProfile.user_id)
                 .join(Category, cls.categoryID == Category.categoryID)
                 .filter(cls.serviceStatus == True)
                 .filter(User.isActive == True)
@@ -104,19 +109,20 @@ class CleaningService(db.Model):
             category_id (int): ID of the category to filter by
             
         Returns:
-            list: List of tuples containing (service, cleaner, cleaner_profile, category)
+            list: List of tuples containing (service, cleaner, category)
         """
         try:
+            from entity.UserAccount import User
+            from entity.Category import Category
+            
             # Query active services filtered by category
             results = (
                 db.session.query(
                     cls,
                     User,
-                    UserProfile,
                     Category
                 )
                 .join(User, cls.cleanerID == User.userID)
-                .join(UserProfile, User.userID == UserProfile.user_id)
                 .join(Category, cls.categoryID == Category.categoryID)
                 .filter(cls.serviceStatus == True)
                 .filter(User.isActive == True)
@@ -139,9 +145,12 @@ class CleaningService(db.Model):
             keyword (str): Search keyword
             
         Returns:
-            list: List of tuples containing (service, cleaner, cleaner_profile, category)
+            list: List of tuples containing (service, cleaner, category)
         """
         try:
+            from entity.UserAccount import User
+            from entity.Category import Category
+            
             # If no keyword provided, return all services
             if not keyword or not keyword.strip():
                 return cls.get_all_services_with_details()
@@ -151,11 +160,9 @@ class CleaningService(db.Model):
                 db.session.query(
                     cls,
                     User,
-                    UserProfile,
                     Category
                 )
                 .join(User, cls.cleanerID == User.userID)
-                .join(UserProfile, User.userID == UserProfile.user_id)
                 .join(Category, cls.categoryID == Category.categoryID)
                 .filter(cls.serviceStatus == True)
                 .filter(User.isActive == True)
@@ -165,8 +172,8 @@ class CleaningService(db.Model):
                         cls.title.ilike(f'%{keyword}%'),
                         cls.description.ilike(f'%{keyword}%'),
                         Category.name.ilike(f'%{keyword}%'),
-                        UserProfile.first_name.ilike(f'%{keyword}%'),
-                        UserProfile.last_name.ilike(f'%{keyword}%')
+                        User.first_name.ilike(f'%{keyword}%'),
+                        User.last_name.ilike(f'%{keyword}%')
                     )
                 )
                 .all()
@@ -252,3 +259,41 @@ class CleaningService(db.Model):
         self.serviceStatus = True
         db.session.commit()
         return True
+
+# Add this method to the CleaningService class in CleaningService.py
+    
+    @classmethod
+    def get_service_detail_with_relations(cls, service_id):
+        """
+        Get detailed information about a specific cleaning service with related entities
+        
+        Args:
+            service_id (int): ID of the service to retrieve
+            
+        Returns:
+            tuple: Tuple containing (service, cleaner, category) or None if not found
+        """
+        try:
+            from entity.UserAccount import User
+            from entity.Category import Category
+            
+            # Query specific service with cleaner and category data
+            result = (
+                db.session.query(
+                    cls,
+                    User,
+                    Category
+                )
+                .join(User, cls.cleanerID == User.userID)
+                .join(Category, cls.categoryID == Category.categoryID)
+                .filter(cls.serviceID == service_id)
+                .filter(cls.serviceStatus == True)
+                .filter(User.isActive == True)
+                .filter(Category.categoryStatus == True)
+                .first()
+            )
+            
+            return result
+        except Exception as e:
+            print(f"Error getting service detail: {str(e)}")
+            return None

@@ -1,5 +1,6 @@
 from flask import Blueprint, render_template, request, redirect, url_for, flash, session
 from controller.platformManager.viewCategoryController import viewCategoryController
+from controller.platformManager.viewDetailCategoryController import viewDetailCategoryController
 from controller.platformManager.createCategoryController import createCategoryController
 from controller.platformManager.searchCategoryController import searchCategoryController
 from controller.platformManager.suspendCategoryController import suspendCategoryController
@@ -22,6 +23,26 @@ def manage_categories():
     # Get all categories
     categories = viewCategoryController.get_all_categories()
     return render_template('platformManager/categoryManagementPage.html', categories=categories)
+
+# View Category Details
+@CategoryManagementUI_bp.route('/categories/detail/<int:category_id>', methods=['GET'])
+def view_category_detail(category_id):
+    """
+    Display details of a specific category
+    """
+    if 'user_id' not in session:
+        flash("You must be logged in to perform this action", "danger")
+        return redirect(url_for('platformManager_login.platformManagerLogin'))
+    user_id = session['user_id']
+    
+    # Get category by ID
+    category = viewDetailCategoryController.get_category_detail(category_id)
+    
+    if not category:
+        flash("Category not found.", "danger")
+        return redirect(url_for('CategoryManagementUI.manage_categories'))
+    
+    return render_template('platformManager/viewCategoryDetail.html', category=category)
 
 # Create New Category - GET
 @CategoryManagementUI_bp.route('/categories/create', methods=['GET'])
@@ -49,7 +70,6 @@ def create_category():
     # Get form data
     name = request.form.get('name')
     description = request.form.get('description')
-    status = request.form.get('categoryStatus')
     
     # Validate form data
     if not name:
@@ -57,7 +77,7 @@ def create_category():
         return redirect(url_for('CategoryManagementUI.create_category_form'))
 
     # Create category 
-    success, message = createCategoryController.create_category(name, description, status)
+    success, message = createCategoryController.create_category(name, description)
     
     if success:
         flash(message, "success")

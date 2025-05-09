@@ -54,7 +54,7 @@
                 <div class="p-3">
                     <h4>Admin Panel</h4>
                 </div>
-                <a href="{{ url_for('admin_dashboard.dashboard') }}" class="active" >
+                <a href="{{ url_for('user_management.view_users') }}" class="active" >
                     <i class="fa fa-users"></i> User Accounts
                 </a>
 
@@ -84,7 +84,7 @@
                     <h2>
                         {% if search_keyword %}
                         Search Results for "{{ search_keyword }}"
-                        <a href="{{ url_for('admin_dashboard.dashboard') }}" class="btn btn-sm btn-outline-secondary">
+                        <a href="{{ url_for('user_management.view_users') }}" class="btn btn-sm btn-outline-secondary">
                             <i class="fas fa-times"></i> Clear Search
                         </a>
                         {% else %}
@@ -92,7 +92,7 @@
                         {% endif %}
                     </h2>
                     <div class="header-actions">
-                        <a href="{{ url_for('create_user.create_user') }}" class="btn btn-primary">
+                        <a href="{{ url_for('user_management.create_user') }}" class="btn btn-primary">
                             <i class="fas fa-plus me-2"></i> Create New User
                         </a>
                     </div>
@@ -101,9 +101,9 @@
                 <div class="table-container">
                     <!-- Search Form -->
                     <div class="search-container">
-                        <form action="{{ url_for('search_userAcc.search_userAcc') }}" method="POST">
+                        <form action="{{ url_for('user_management.search_users') }}" method="POST">
                             <div class="input-group mb-3">
-                                <input type="text" class="form-control" placeholder="Search by email" 
+                                <input type="text" class="form-control" placeholder="Search by email, name, phone, address..." 
                                        name="keyword" id="searchQuery" value="{{ search_keyword }}">
                                 <button class="btn btn-outline-secondary" type="submit">
                                     <i class="fas fa-search"></i> Search
@@ -117,8 +117,8 @@
                             <tr>
                                 <th>ID</th>
                                 <th>Email</th>
-                                <th>Role</th>
-                                <th>Password</th>
+                                <th>User Profile</th>
+                                <th>Name</th>
                                 <th>Created Date</th>
                                 <th>Status</th>
                                 <th>Actions</th>
@@ -130,13 +130,12 @@
                                 <tr>
                                     <td>{{ user.userID }}</td>
                                     <td>{{ user.email }}</td>
-
                                     <td>
-                                        <span class="badge bg-{{ 'primary' if user.role == 'User admin' else 'success' if user.role == 'Cleaner' else 'info' if user.role == 'Homeowner' else 'secondary' }}">
-                                            {{ user.role }}
+                                        <span class="badge bg-{{ 'primary' if user.profile.role_name == 'User admin' else 'success' if user.profile.role_name == 'Cleaner' else 'info' if user.profile.role_name == 'Homeowner' else 'secondary' }}">
+                                            {{ user.profile.role_name }}
                                         </span>
                                     </td>
-                                    <td>{{ user.password[:20] }}</td>
+                                    <td>{{ user.first_name }} {{ user.last_name }}</td>
                                     <td>{{ user.created_at.strftime('%Y-%m-%d') }}</td>
                                     <td>
                                         <span class="badge bg-{{ 'success' if user.isActive else 'danger' }}">
@@ -144,26 +143,32 @@
                                         </span>
                                     </td>
                                     <td>
-                                        <a href="{{ url_for('admin_dashboard.edit_user', target_user_id=user.userID) }}" class="btn btn-sm btn-info" title="Edit">
+                                        <!-- View button -->
+                                        <a href="{{ url_for('user_management.view_user_detail', target_user_id=user.userID) }}" class="btn btn-sm btn-info" title="View Details">
+                                            <i class="fas fa-eye"></i>
+                                        </a>
+                                        
+                                        <!-- Edit button (already exists) -->
+                                        <a href="{{ url_for('user_management.update_user', target_user_id=user.userID) }}" class="btn btn-sm btn-warning" title="Edit">
                                             <i class="fas fa-edit"></i>
                                         </a>
                                         
+                                        <!-- Suspend/Reactivate buttons (already exist) -->
                                         {% if user.isActive %}
                                         <!-- Suspend button for active users -->
-                                        <form action="{{ url_for('suspend_user.suspend_user', target_user_id=user.userID) }}" method="post" style="display:inline;">
-                                            <button type="submit" class="btn btn-sm btn-warning" onclick="return confirm('Are you sure you want to suspend this user?')" title="Suspend">
+                                        <form action="{{ url_for('user_management.suspend_user', target_user_id=user.userID) }}" method="post" style="display:inline;">
+                                            <button type="submit" class="btn btn-sm btn-danger" onclick="return confirm('Are you sure you want to suspend this user?')" title="Suspend">
                                                 <i class="fa-solid fa-circle-pause"></i>
                                             </button>
                                         </form>
                                         {% else %}
                                         <!-- Reactivate button for suspended users -->
-                                        <form action="{{ url_for('suspend_user.reactivate_user', target_user_id=user.userID) }}" method="post" style="display:inline;">
+                                        <form action="{{ url_for('user_management.reactivate_user', target_user_id=user.userID) }}" method="post" style="display:inline;">
                                             <button type="submit" class="btn btn-sm btn-success" onclick="return confirm('Do you want to reactivate this user?')" title="Reactivate">
                                                 <i class="fa-solid fa-circle-play"></i>
                                             </button>
                                         </form>
                                         {% endif %}
-                                        
                                     </td>
                                 </tr>
                                 {% endfor %}

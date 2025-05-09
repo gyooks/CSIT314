@@ -1,55 +1,157 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Edit User Account</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        .sidebar {
+            min-height: 100vh;
+            background-color: #343a40;
+            color: white;
+        }
+        .sidebar a {
+            color: #ced4da;
+            text-decoration: none;
+            display: block;
+            padding: 10px 15px;
+        }
+        .sidebar a:hover {
+            background-color: #495057;
+            color: white;
+        }
+        .sidebar a.active {
+            background-color: #0d6efd;
+            color: white;
+        }
+        .main-content {
+            padding: 20px;
+        }
+        .form-container {
+            background-color: white;
+            border-radius: 5px;
+            padding: 20px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+        }
+    </style>
 </head>
 <body>
-<div class="container mt-5">
-    <h2>Edit User Account</h2>
-
-    <!-- Flash messages -->
-    {% with messages = get_flashed_messages(with_categories=true) %}
-        {% if messages %}
-            {% for category, message in messages %}
-                <div class="alert alert-{{ category if category != 'error' else 'danger' }}" role="alert">
-                    {{ message }}
+    <div class="container-fluid">
+        <div class="row">
+            <!-- Sidebar -->
+            <div class="col-md-2 p-0 sidebar">
+                <div class="p-3">
+                    <h4>Admin Panel</h4>
                 </div>
-            {% endfor %}
-        {% endif %}
-    {% endwith %}
+                <a href="{{ url_for('user_management.view_users') }}" class="active">
+                    <i class="fa fa-users"></i> User Accounts
+                </a>
 
-    <form method="POST" action="{{ url_for('admin_dashboard.edit_user', target_user_id=user.userID) }}">
-        <div class="mb-3">
-            <label>Email</label>
-            <input type="email" name="email" value="{{ user.email }}" class="form-control" required>
+                <a href="{{ url_for('profile_management.view_profile') }}">
+                    <i class="fa-solid fa-address-card"></i> User Profiles
+                </a>
+                
+                <a href="{{ url_for('admin_logout.userAdminLogout') }}">
+                    <i class="fas fa-sign-out-alt me-2"></i> Logout
+                </a>
+            </div>
+            
+            <!-- Main Content -->
+            <div class="col-md-10 main-content">
+                <!-- Flash messages -->
+                {% with messages = get_flashed_messages(with_categories=true) %}
+                    {% if messages %}
+                        {% for category, message in messages %}
+                            <div class="alert alert-{{ category if category != 'error' else 'danger' }}" role="alert">
+                                {{ message }}
+                            </div>
+                        {% endfor %}
+                    {% endif %}
+                {% endwith %}
+                
+                <div class="d-flex justify-content-between align-items-center mb-4">
+                    <h2>Edit User Account</h2>
+                    <a href="{{ url_for('user_management.view_users') }}" class="btn btn-secondary">
+                        <i class="fas fa-arrow-left me-2"></i> Back to Users
+                    </a>
+                </div>
+                
+                <div class="form-container">
+                    <form method="POST" action="{{ url_for('user_management.update_user', target_user_id=user.userID) }}">
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <h4>Account Information</h4>
+                                <div class="mb-3">
+                                    <label for="email" class="form-label">Email <span class="text-danger">*</span></label>
+                                    <input type="email" class="form-control" id="email" name="email" value="{{ user.email }}" required>
+                                </div>
+                                <div class="mb-3">
+                                    <label for="password" class="form-label">New Password</label>
+                                    <input type="password" class="form-control" id="password" name="password" placeholder="">
+                                </div>
+                                <div class="mb-3">
+                                    <label for="confirm_password" class="form-label">Confirm Password</label>
+                                    <input type="password" class="form-control" id="confirm_password" name="confirm_password" placeholder="">
+                                </div>
+                                <div class="mb-3">
+                                    <label for="role_id" class="form-label">User Profile <span class="text-danger">*</span></label>
+                                    <select class="form-select" id="role_id" name="role_id" required>
+                                        <option value="">Select a profile</option>
+                                        {% for profile in profiles %}
+                                        <option value="{{ profile.role_id }}" {% if user.role_id == profile.role_id %}selected{% endif %}>{{ profile.role_name }}</option>
+                                        {% endfor %}
+                                    </select>
+                                </div>
+                            </div>
+                            
+                            <div class="col-md-6">
+                                <h4>Personal Information</h4>
+                                <div class="mb-3">
+                                    <label for="first_name" class="form-label">First Name <span class="text-danger">*</span></label>
+                                    <input type="text" class="form-control" id="first_name" name="first_name" value="{{ user.first_name }}" required>
+                                </div>
+                                <div class="mb-3">
+                                    <label for="last_name" class="form-label">Last Name <span class="text-danger">*</span></label>
+                                    <input type="text" class="form-control" id="last_name" name="last_name" value="{{ user.last_name }}" required>
+                                </div>
+                                <div class="mb-3">
+                                    <label for="address" class="form-label">Address <span class="text-danger">*</span></label>
+                                    <textarea class="form-control" id="address" name="address" rows="3" required>{{ user.address }}</textarea>
+                                </div>
+                                <div class="mb-3">
+                                    <label for="phone" class="form-label">Phone Number <span class="text-danger">*</span></label>
+                                    <input type="tel" class="form-control" id="phone" name="phone" value="{{ user.phone }}" required>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                            <button type="reset" class="btn btn-outline-secondary me-md-2">Reset Changes</button>
+                            <button type="submit" class="btn btn-success">Update User</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
         </div>
-        <div class="mb-3">
-            <label>New Password</label>
-            <input type="password" name="password" class="form-control">
-        </div>
-        <div class="mb-3">
-            <label>Confirm Password</label>
-            <input type="password" class="form-control" id="confirm_password" name="confirm_password">
-        </div>
-        <div class="mb-3">
-            <label>Role</label>
-            <select name="role" class="form-control">
-                <option value="User admin" {% if user.role == 'User admin' %}selected{% endif %}>User admin</option>
-                <option value="Platform manager" {% if user.role == 'Platform manager' %}selected{% endif %}>Platform manager</option>
-                <option value="Cleaner" {% if user.role == 'Cleaner' %}selected{% endif %}>Cleaner</option>
-                <option value="Homeowner" {% if user.role == 'Homeowner' %}selected{% endif %}>Homeowner</option>
-            </select>
-        </div>
-        <div class="form-check mb-3">
-            <input class="form-check-input" type="checkbox" name="isActive" id="isActive" {% if user.isActive %}checked{% endif %}>
-            <label class="form-check-label" for="isActive">
-                Active
-            </label>
-        </div>
-        <button type="submit" class="btn btn-success">Update</button>
-        <a href="{{ url_for('admin_dashboard.dashboard') }}" class="btn btn-secondary">Cancel</a>
-    </form>
-</div>
+    </div>
+    
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Client-side validation for password matching
+        document.addEventListener('DOMContentLoaded', function() {
+            const form = document.querySelector('form');
+            form.addEventListener('submit', function(event) {
+                const password = document.getElementById('password').value;
+                const confirmPassword = document.getElementById('confirm_password').value;
+                
+                if (password && password !== confirmPassword) {
+                    event.preventDefault();
+                    alert('Passwords do not match!');
+                }
+            });
+        });
+    </script>
 </body>
 </html>

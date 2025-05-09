@@ -12,8 +12,8 @@ class LoginController:
         if not user.isActive:
             return False, "Account is inactive. Please contact an administrator."
         
-        # Check if user is an admin
-        if user.role != "Homeowner":
+        # Check if user is homeowner
+        if not user.profile or user.profile.role_name != "Homeowner":
             return False, "Access denied. Only homeowner can login here."
             
         if user.verify_password(password):

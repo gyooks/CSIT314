@@ -98,7 +98,7 @@
                     <i class="fas fa-calendar me-2"></i> My Bookings
                 </a>
                 
-                <a href="#">
+                <a href="{{ url_for('homeowner_logout.homeownerLogout') }}">
                     <i class="fas fa-sign-out-alt me-2"></i> Logout
                 </a>
             </div>
@@ -175,12 +175,12 @@
                             </thead>
                             <tbody>
                                 {% if bookings %}
-                                    {% for booking, cleaner, profile, service in bookings %}
+                                    {% for booking, cleaner, service in bookings %}
                                         <tr>
                                             <td>{{ loop.index }}</td>
                                             <td>{{ service.title }}</td>
-                                            <td>{{ profile.first_name }} {{ profile.last_name }}</td>
-                                            <td>{{ profile.phone }}</td>
+                                            <td>{{ cleaner.first_name }} {{ cleaner.last_name }}</td>
+                                            <td>{{ cleaner.phone }}</td>
                                             <td>{{ booking.bookingDate.strftime('%d %b, %Y') }}</td>
                                             <td>{{ booking.bookingHour }}</td>
                                             <td>${{ "%.2f"|format(booking.totalPrice) }}</td>
@@ -215,7 +215,7 @@
     
     <!-- Review Modals -->
     {% if bookings %}
-        {% for booking, cleaner, profile, service in bookings %}
+        {% for booking, cleaner, service in bookings %}
             {% if booking.bookingStatus == 'Completed' %}
                 <div class="modal fade" id="reviewModal{{ booking.bookingID }}" tabindex="-1" aria-labelledby="reviewModalLabel{{ booking.bookingID }}" aria-hidden="true">
                     <div class="modal-dialog">
@@ -228,7 +228,7 @@
                                 <p>You are writing a review for:</p>
                                 <ul class="list-group list-group-flush mb-3">
                                     <li class="list-group-item"><strong>Service:</strong> {{ service.title }}</li>
-                                    <li class="list-group-item"><strong>Cleaner:</strong> {{ profile.first_name }} {{ profile.last_name }}</li>
+                                    <li class="list-group-item"><strong>Cleaner:</strong> {{ cleaner.first_name }} {{ cleaner.last_name }}</li>
                                     <li class="list-group-item"><strong>Date:</strong> {{ booking.bookingDate.strftime('%d %b, %Y') }}</li>
                                 </ul>
                                 

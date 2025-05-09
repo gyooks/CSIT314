@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Admin Dashboard - Cleaning Service</title>
+    <title>Admin Dashboard - Role Management</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 
@@ -54,7 +54,7 @@
                 <div class="p-3">
                     <h4>Admin Panel</h4>
                 </div>
-                <a href="{{ url_for('admin_dashboard.dashboard') }}" >
+                <a href="{{ url_for('user_management.view_users') }}">
                     <i class="fa fa-users"></i> User Accounts
                 </a>
 
@@ -92,8 +92,8 @@
                         {% endif %}
                     </h2>
                     <div class="header-actions">
-                        <a href="{{ url_for('create_user.create_user') }}" class="btn btn-primary">
-                            <i class="fas fa-plus me-2"></i> Create New User
+                        <a href="{{ url_for('profile_management.create_profile') }}" class="btn btn-primary">
+                            <i class="fas fa-plus me-2"></i> Create New Profile
                         </a>
                     </div>
                 </div>
@@ -103,7 +103,7 @@
                     <div class="search-container">
                         <form action="{{ url_for('profile_management.search_profile') }}" method="POST">
                             <div class="input-group mb-3">
-                                <input type="text" class="form-control" placeholder="Search by name, address, phone..." 
+                                <input type="text" class="form-control" placeholder="Search by role name or description..." 
                                        name="keyword" id="searchQuery" value="{{ search_keyword }}">
                                 <button class="btn btn-outline-secondary" type="submit">
                                     <i class="fas fa-search"></i> Search
@@ -116,10 +116,8 @@
                         <thead>
                             <tr>
                                 <th>ID</th>
-                                <th>First Name</th>
-                                <th>Last Name</th>
-                                <th>Phone</th>
-                                <th>Address</th>
+                                <th>Role Name</th>
+                                <th>Description</th>
                                 <th>Status</th>
                                 <th>Actions</th>
                             </tr>
@@ -128,47 +126,50 @@
                             {% if userprofiles %}
                                 {% for userprofile in userprofiles %}
                                 <tr>
-                                    <td>{{ userprofile.profile_id }}</td>
-                                    <td>{{ userprofile.first_name }}</td>
-                                    <td>{{ userprofile.last_name }}</td>
-                                    <td>{{ userprofile.phone }}</td>
-                                    <td>{{ userprofile.address }}</td>
+                                    <td>{{ userprofile.role_id }}</td>
+                                    <td>{{ userprofile.role_name }}</td>
+                                    <td>{{ userprofile.description }}</td>
                                     <td>
-                                        <span class="badge bg-{{ 'success' if userprofile.isActive else 'danger' }}">
-                                            {{ 'Active' if userprofile.isActive else 'Inactive' }}
+                                        <span class="badge bg-{{ 'success' if userprofile.roleStatus else 'danger' }}">
+                                            {{ 'Active' if userprofile.roleStatus else 'Inactive' }}
                                         </span>
                                     </td>
                                     <td>
-                                        <a href="{{ url_for('profile_management.update_profile', profile_id=userprofile.profile_id) }}" class="btn btn-sm btn-info" title="Edit">
+                                        <!-- View button -->
+                                        <a href="{{ url_for('profile_management.view_profile_detail', role_id=userprofile.role_id) }}" class="btn btn-sm btn-info" title="View Details">
+                                            <i class="fas fa-eye"></i>
+                                        </a>
+                                        
+                                        <!-- Edit button -->
+                                        <a href="{{ url_for('profile_management.update_profile', role_id=userprofile.role_id) }}" class="btn btn-sm btn-warning" title="Edit">
                                             <i class="fas fa-edit"></i>
                                         </a>
                                         
-                                        {% if userprofile.isActive %}
-                                        <!-- Suspend button for active users -->
-                                        <form action="{{ url_for('profile_management.suspend_profile', profile_id=userprofile.profile_id) }}" method="post" style="display:inline;">
-                                            <button type="submit" class="btn btn-sm btn-warning" onclick="return confirm('Are you sure you want to suspend this profile?')" title="Suspend">
+                                        {% if userprofile.roleStatus %}
+                                        <!-- Suspend button for active roles -->
+                                        <form action="{{ url_for('profile_management.suspend_profile', role_id=userprofile.role_id) }}" method="post" style="display:inline;">
+                                            <button type="submit" class="btn btn-sm btn-danger" onclick="return confirm('Are you sure you want to suspend this role?')" title="Suspend">
                                                 <i class="fa-solid fa-circle-pause"></i>
                                             </button>
                                         </form>
                                         {% else %}
-                                        <!-- Reactivate button for suspended users -->
-                                        <form action="{{ url_for('profile_management.reactivate_profile', profile_id=userprofile.profile_id) }}" method="post" style="display:inline;">
-                                            <button type="submit" class="btn btn-sm btn-success" onclick="return confirm('Do you want to reactivate this profile?')" title="Reactivate">
+                                        <!-- Reactivate button for suspended roles -->
+                                        <form action="{{ url_for('profile_management.reactivate_profile', role_id=userprofile.role_id) }}" method="post" style="display:inline;">
+                                            <button type="submit" class="btn btn-sm btn-success" onclick="return confirm('Do you want to reactivate this role?')" title="Reactivate">
                                                 <i class="fa-solid fa-circle-play"></i>
                                             </button>
                                         </form>
                                         {% endif %}
-                                        
                                     </td>
                                 </tr>
                                 {% endfor %}
                             {% else %}
                                 <tr>
-                                    <td colspan="7" class="text-center">
+                                    <td colspan="5" class="text-center">
                                         {% if search_keyword %}
-                                            No profiles found matching "{{ search_keyword }}"
+                                            No roles found matching "{{ search_keyword }}"
                                         {% else %}
-                                            No profiles found
+                                            No roles found
                                         {% endif %}
                                     </td>
                                 </tr>

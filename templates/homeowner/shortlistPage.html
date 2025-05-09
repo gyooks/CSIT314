@@ -84,7 +84,7 @@
                     <i class="fas fa-calendar me-2"></i> My Bookings
                 </a>
                 
-                <a href="#">
+                <a href="{{ url_for('homeowner_logout.homeownerLogout') }}">
                     <i class="fas fa-sign-out-alt me-2"></i> Logout
                 </a>
             </div>
@@ -135,26 +135,27 @@
                                     <tr>
                                         <th>#</th>
                                         <th>Category</th>
-                                        <th>Service</th>
+                                        <th>Service Title</th>
                                         <th>Cleaner</th>
-                                        <th>Contact</th>
                                         <th>Price</th>
                                         <th>Actions</th>
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    {% for shortlist, service, cleaner, profile, category in shortlisted_services %}
+                                    {% for shortlist, service, cleaner, category in shortlisted_services %}
                                         <tr>
                                             <td>{{ loop.index }}</td>
                                             <td>
                                                {{ category.name }}
                                             </td>
                                             <td>{{ service.title }}</td>
-                                            <td>{{ profile.first_name }} {{ profile.last_name }}</td>
-                                            <td>{{ profile.phone }}</td>
-                                            <td class="price">${{ "%.2f"|format(service.price) }}</td>
+                                            <td>{{ cleaner.first_name }} {{ cleaner.last_name }}</td>
+                                            <td class="price">${{ "%.2f"|format(service.price) }} /hour</td>
                                             <td>
                                                 <div class="action-buttons">
+                                                    <a href="{{ url_for('CleanerServiceManagementUI.get_service_detail', service_id=service.serviceID) }}" class="btn btn-sm btn-info" title="View Details">
+                                                        <i class="fas fa-eye"></i>
+                                                    </a>
                                                  
                                                     <button type="button" class="btn btn-sm btn-success" data-bs-toggle="modal" data-bs-target="#bookServiceModal{{ service.serviceID }}" title="Book Service">
                                                         <i class="fas fa-calendar-plus"></i>
@@ -192,7 +193,7 @@
     
     <!-- Book Service Modals -->
     {% if shortlisted_services %}
-        {% for shortlist, service, cleaner, profile, category in shortlisted_services %}
+        {% for shortlist, service, cleaner, category in shortlisted_services %}
             <div class="modal fade" id="bookServiceModal{{ service.serviceID }}" tabindex="-1" aria-labelledby="bookServiceModalLabel{{ service.serviceID }}" aria-hidden="true">
                 <div class="modal-dialog">
                     <div class="modal-content">
@@ -204,7 +205,7 @@
                             <p>You are about to book the following service:</p>
                             <ul class="list-group list-group-flush mb-3">
                                 <li class="list-group-item"><strong>Service:</strong> {{ service.title }}</li>
-                                <li class="list-group-item"><strong>Cleaner:</strong> {{ profile.first_name }} {{ profile.last_name }}</li>
+                                <li class="list-group-item"><strong>Cleaner:</strong> {{ cleaner.first_name }} {{ cleaner.last_name }}</li>
                                 <li class="list-group-item"><strong>Price:</strong> <span class="price">${{ "%.2f"|format(service.price) }} / hour</span></li>
                             </ul>
                             

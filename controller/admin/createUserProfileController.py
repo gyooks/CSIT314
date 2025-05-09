@@ -1,32 +1,19 @@
 from entity.UserProfile import UserProfile
 
-class createUserProfileController:
+class CreateUserProfileController:
     @staticmethod
-    def create_profile(user_id, first_name, last_name, address=None, phone=None):
-        """
-        Create a new user profile for an existing user account
+    def create_profile(role_name, description=None):
+        """Create a new user profile/role"""
         
-        Returns:
-            tuple: (success_bool, message_str)
-        """
+        # Check if profile with same name already exists
+        existing_profile = UserProfile.find_by_name(role_name)
+        if existing_profile:
+            return False, "A user role with this name already exists"
+        
+        # Create new profile
         try:
-            # Validate required fields
-            if not first_name or not last_name:
-                return False, "First name and last name are required"
-                
-            # Create user profile
-            user_profile = UserProfile(
-                user_id=user_id,
-                first_name=first_name,
-                last_name=last_name,
-                address=address,
-                phone=phone
-            )
-            
-            # Save to db through entity
-            user_profile.save_to_db()
-            
-            return True, "User profile created successfully"
-                
+            new_profile = UserProfile(role_name=role_name, description=description)
+            new_profile.save_to_db()
+            return True, "User role created successfully"
         except Exception as e:
-            return False, f"Error creating user profile: {str(e)}"
+            return False, f"Error creating user role: {str(e)}"

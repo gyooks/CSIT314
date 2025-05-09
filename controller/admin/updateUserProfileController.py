@@ -2,53 +2,27 @@ from entity.UserProfile import UserProfile
 
 class UpdateProfileController:
     @staticmethod
-    def update_profile(profile_id, first_name, last_name, address, phone):
-        """
-        Update an existing user profile
-        
-        Args:
-            profile_id: The unique identifier for the profile
-            first_name: User's first name
-            last_name: User's last name
-            address: User's address
-            phone: User's phone number
-            
-        Returns:
-            tuple: (success_bool, message_str)
-        """
-        try:
-            # Find the profile
-            profile = UserProfile.find_by_profile_id(profile_id)
-            
-            if not profile:
-                return False, "Profile not found"
-            
-            # Validate required fields
-            if not first_name or not last_name:
-                return False, "First name and last name are required"
-            
-            # Update the profile
-            profile.update_in_db(
-                first_name=first_name,
-                last_name=last_name,
-                address=address,
-                phone=phone
-            )
-            
-            return True, "Profile updated successfully"
-            
-        except Exception as e:
-            return False, f"Error updating profile: {str(e)}"
-
+    def get_profile_by_profile_id(role_id):
+        """Get a user profile/role by ID for updating"""
+        return UserProfile.find_by_id(role_id)
+    
     @staticmethod
-    def get_profile_by_profile_id(profile_id):
-        """
-        Retrieve a user profile by profile ID
+    def update_profile(role_id, role_name, description):
+        """Update a user profile/role"""
         
-        Returns:
-            UserProfile or None
-        """
+        # Find profile
+        profile = UserProfile.find_by_id(role_id)
+        if not profile:
+            return False, "User role not found"
+        
+        # Check if new name already exists (and it's not this profile)
+        existing_profile = UserProfile.find_by_name(role_name)
+        if existing_profile and existing_profile.role_id != role_id:
+            return False, "A user role with this name already exists"
+        
+        # Update profile
         try:
-            return UserProfile.find_by_profile_id(profile_id)
+            profile.update_in_db(role_name=role_name, description=description)
+            return True, "User role updated successfully"
         except Exception as e:
-            return None
+            return False, f"Error updating user role: {str(e)}"

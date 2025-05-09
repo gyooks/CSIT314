@@ -12,9 +12,8 @@ class LoginController:
         if not user.isActive:
             return False, "Account is inactive. Please contact an administrator."
         
-        # Check if user is an admin
-        if user.role != "Platform manager":
-            return False, "Access denied. Only platform managers can login here."
+        if not user.profile or user.profile.role_name != "Platform manager":
+            return False, "Access denied. Only platform manager can login here."
             
         if user.verify_password(password):
             session['user_id'] = user.userID #save login state

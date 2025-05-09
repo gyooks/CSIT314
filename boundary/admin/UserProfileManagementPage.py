@@ -1,33 +1,91 @@
 from flask import Blueprint, render_template, request, session, flash, redirect, url_for
-from controller.admin.viewUserProfileController import viewUserProfileController
+from controller.admin.viewUserProfileController import ViewUserProfileController
+from controller.admin.viewUserProfileDetailController import ViewUserProfileDetailController
+from controller.admin.createUserProfileController import CreateUserProfileController
 from controller.admin.searchUserProfileController import SearchProfileController
 from controller.admin.suspendUserProfileController import SuspendProfileController
 from controller.admin.updateUserProfileController import UpdateProfileController
 
-# Create a single blueprint for all profile management routes
+# Create a single blueprint for all profile (role) management routes
 profile_management_bp = Blueprint('profile_management', __name__, url_prefix='/profile')
 
 # View profile routes
 @profile_management_bp.route('/view', methods=['GET'])
 def view_profile():
     """
-    View a user profile by profile ID
+    View all user profiles (roles)
     """
     # Check if user is logged in
     if 'user_id' not in session:
         flash("You must be logged in to perform this action", "danger")
         return redirect(url_for('admin_login.userAdminLogin'))
     
-    userprofiles = viewUserProfileController.get_all_profiles()
+    userprofiles = ViewUserProfileController.get_all_profiles()
     
-    # Render profile detail template
+    # Render profile management template
     return render_template('admin/userProfileManagementPage.html', userprofiles=userprofiles)
 
-# Update profile routes
-@profile_management_bp.route('/edit/<int:profile_id>', methods=['GET', 'POST'])
-def update_profile(profile_id):
+
+
+@profile_management_bp.route('/detail/<int:role_id>', methods=['GET'])
+def view_profile_detail(role_id):
     """
-    Update a user profile
+    View details of a specific user profile (role)
+    """
+    # Check if user is logged in
+    if 'user_id' not in session:
+        flash("You must be logged in to perform this action", "danger")
+        return redirect(url_for('admin_login.userAdminLogin'))
+    
+    # Get profile details from controller
+    userprofile = ViewUserProfileDetailController.get_profile_detail(role_id)
+    
+    if not userprofile:
+        flash("Role not found", "error")
+        return redirect(url_for('profile_management.view_profile'))
+    
+    # Render profile detail template
+    return render_template('admin/userProfileDetailPage.html', userprofile=userprofile)
+
+# Create profile route
+@profile_management_bp.route('/create', methods=['GET', 'POST'])
+def create_profile():
+    """
+    Create a new user profile (role)
+    """
+    # Check if user is logged in
+    if 'user_id' not in session:
+        flash("You must be logged in to perform this action", "danger")
+        return redirect(url_for('admin_login.userAdminLogin'))
+    
+    # GET request - show the create form
+    if request.method == 'GET':
+        return render_template('admin/create_userProfile.html')
+    
+    # POST request - create the profile
+    elif request.method == 'POST':
+        # Get form data
+        role_name = request.form.get('role_name')
+        description = request.form.get('description')
+        
+        # Create profile through controller
+        success, message = CreateUserProfileController.create_profile(
+            role_name=role_name,
+            description=description
+        )
+        
+        if success:
+            flash(message, "success")
+            return redirect(url_for('profile_management.view_profile'))
+        else:
+            flash(message, "error")
+            return render_template('admin/create_userProfile.html')
+
+# Update profile routes
+@profile_management_bp.route('/edit/<int:role_id>', methods=['GET', 'POST'])
+def update_profile(role_id):
+    """
+    Update a user profile (role)
     """
     # Check if user is logged in
     if 'user_id' not in session:
@@ -37,67 +95,42 @@ def update_profile(profile_id):
     # GET request - show the update form
     if request.method == 'GET':
         # Get profile from controller
-        userprofiles = UpdateProfileController.get_profile_by_profile_id(profile_id)
+        userprofile = UpdateProfileController.get_profile_by_profile_id(role_id)
         
-        if not userprofiles:
-            flash("Profile not found", "error")
+        if not userprofile:
+            flash("Role not found", "error")
             return redirect(url_for('profile_management.view_profile'))
         
         # Render update profile form
-        return render_template('admin/editProfile.html', userprofiles=userprofiles)
+        return render_template('admin/edit_userProfile.html', userprofile=userprofile)
     
     # POST request - update the profile
     elif request.method == 'POST':
         # Get form data
-        first_name = request.form.get('first_name')
-        last_name = request.form.get('last_name')
-        address = request.form.get('address')
-        phone = request.form.get('phone')
+        role_name = request.form.get('role_name')
+        description = request.form.get('description')
         
         # Update profile through controller
         success, message = UpdateProfileController.update_profile(
-            profile_id=profile_id,
-            first_name=first_name,
-            last_name=last_name,
-            address=address,
-            phone=phone
+            role_id=role_id,
+            role_name=role_name,
+            description=description
         )
         
         if success:
             flash(message, "success")
-            return redirect(url_for('profile_management.view_profile', profile_id=profile_id))
+            return redirect(url_for('profile_management.view_profile'))
         else:
             flash(message, "error")
-            return render_template('admin/updateProfile.html', 
-                                  profile=viewUserProfileController.get_profile_by_profile_id(profile_id))
-
-# Delete profile route
-@profile_management_bp.route('/delete/<int:profile_id>', methods=['POST'])
-def delete_profile(profile_id):
-    """
-    Delete a user profile
-    """
-    # Check if user is logged in
-    if 'user_id' not in session:
-        flash("You must be logged in to perform this action", "danger")
-        return redirect(url_for('admin_login.userAdminLogin'))
-    
-    # Delete profile through controller
-    success, message = DeleteProfileController.delete_profile(profile_id)
-    
-    if success:
-        flash(message, "success")
-    else:
-        flash(message, "error")
-    
-    # Redirect back to dashboard after deletion
-    return redirect(url_for('profile_management.view_profile'))
+            # Get profile data again to redisplay the form
+            userprofile = UpdateProfileController.get_profile_by_profile_id(role_id)
+            return render_template('admin/edit_userProfile.html', userprofile=userprofile)
 
 # Suspend/Reactivate profile routes
-@profile_management_bp.route('/suspend/<int:profile_id>', methods=['POST'])
-def suspend_profile(profile_id):
+@profile_management_bp.route('/suspend/<int:role_id>', methods=['POST'])
+def suspend_profile(role_id):
     """
-    Suspend a user profile
+    Suspend a user profile (role)
     """
     # Check if user is logged in
     if 'user_id' not in session:
@@ -105,7 +138,7 @@ def suspend_profile(profile_id):
         return redirect(url_for('admin_login.userAdminLogin'))
     
     # Suspend profile through controller
-    success, message = SuspendProfileController.suspend_profile(profile_id)
+    success, message = SuspendProfileController.suspend_profile(role_id)
     
     if success:
         flash(message, "success")
@@ -113,12 +146,12 @@ def suspend_profile(profile_id):
         flash(message, "error")
     
     # Redirect back to profile view
-    return redirect(url_for('profile_management.view_profile', profile_id=profile_id))
+    return redirect(url_for('profile_management.view_profile'))
 
-@profile_management_bp.route('/reactivate/<int:profile_id>', methods=['POST'])
-def reactivate_profile(profile_id):
+@profile_management_bp.route('/reactivate/<int:role_id>', methods=['POST'])
+def reactivate_profile(role_id):
     """
-    Reactivate a suspended user profile
+    Reactivate a suspended user profile (role)
     """
     # Check if user is logged in
     if 'user_id' not in session:
@@ -126,7 +159,7 @@ def reactivate_profile(profile_id):
         return redirect(url_for('admin_login.userAdminLogin'))
     
     # Reactivate profile through controller
-    success, message = SuspendProfileController.reactivate_profile(profile_id)
+    success, message = SuspendProfileController.reactivate_profile(role_id)
     
     if success:
         flash(message, "success")
@@ -134,13 +167,13 @@ def reactivate_profile(profile_id):
         flash(message, "error")
     
     # Redirect back to profile view
-    return redirect(url_for('profile_management.view_profile', profile_id=profile_id))
+    return redirect(url_for('profile_management.view_profile'))
 
 # Search profile route
 @profile_management_bp.route('/search', methods=['GET', 'POST'])
 def search_profile():
     """
-    Search user profiles
+    Search user profiles (roles)
     """
     # Check if user is logged in
     if 'user_id' not in session:
@@ -148,7 +181,7 @@ def search_profile():
         return redirect(url_for('admin_login.userAdminLogin'))
     
     keyword = ""
-    userprofiles = []  #match with html page...
+    userprofiles = []
     
     # Check if it's a POST request (search form submitted)
     if request.method == 'POST':

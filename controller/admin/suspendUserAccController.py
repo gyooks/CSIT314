@@ -1,7 +1,7 @@
 from entity.UserAccount import User
 from db_config import db
 
-class suspendUserAccController:
+class SuspendUserAccController:
     @staticmethod
     def suspend_user(user_id):
         """

@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Service Details - Cleaner Dashboard</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+
+    <style>
+        .sidebar {
+            min-height: 100vh;
+            background-color: #343a40;
+            color: white;
+        }
+        .sidebar a {
+            color: #ced4da;
+            text-decoration: none;
+            display: block;
+            padding: 10px 15px;
+        }
+        .sidebar a:hover {
+            background-color: #495057;
+            color: white;
+        }
+        .sidebar a.active {
+            background-color: #0d6efd;
+            color: white;
+        }
+        .main-content {
+            padding: 20px;
+        }
+        .detail-container {
+            background-color: white;
+            border-radius: 5px;
+            padding: 20px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+        }
+        .detail-card {
+            margin-top: 20px;
+        }
+        .detail-header {
+            background-color: #f8f9fa;
+            border-bottom: 1px solid #dee2e6;
+            padding: 15px;
+        }
+        .detail-body {
+            padding: 20px;
+        }
+        .detail-item {
+            margin-bottom: 15px;
+        }
+        .detail-label {
+            font-weight: bold;
+            color: #495057;
+        }
+        .detail-value {
+            color: #212529;
+        }
+        .action-buttons {
+            margin-top: 20px;
+        }
+        .shortlist-container {
+            margin-top: 20px;
+            padding: 15px;
+            background-color: #f8f9fa;
+            border-radius: 5px;
+        }
+        .badge-large {
+            font-size: 1rem;
+            padding: 6px 12px;
+        }
+        .price-highlight {
+            font-size: 1.5rem;
+            color: #28a745;
+            font-weight: bold;
+        }
+        .date-formatting {
+            color: #6c757d;
+            font-size: 0.9rem;
+        }
+        .service-description {
+            background-color: #f9f9f9;
+            padding: 15px;
+            border-radius: 5px;
+            margin-top: 10px;
+            border-left: 4px solid #0d6efd;
+        }
+    </style>
+</head>
+<body>
+    <div class="container-fluid">
+        <div class="row">
+            <!-- Sidebar -->
+            <div class="col-md-2 p-0 sidebar">
+                <div class="p-3">
+                    <h4>Cleaner Dashboard</h4>
+                </div>
+                
+                <a href="{{ url_for('CleaningServiceManagementUI.manage_services') }}" class="active">
+                    <i class="fas fa-broom me-2"></i> My Services
+                </a>
+                
+                <a href="{{ url_for('BookingManagementUI.manage_bookings') }}">
+                    <i class="fas fa-calendar me-2"></i> My Bookings
+                </a>
+                
+                <a href="{{ url_for('cleaner_logout.cleanerLogout') }}">
+                    <i class="fas fa-sign-out-alt me-2"></i> Logout
+                </a>
+            </div>
+            
+            <!-- Main Content -->
+            <div class="col-md-10 main-content">
+                <!-- Flash messages -->
+                {% with messages = get_flashed_messages(with_categories=true) %}
+                    {% if messages %}
+                        {% for category, message in messages %}
+                            <div class="alert alert-{{ category if category != 'error' else 'danger' }}" role="alert">
+                                {{ message }}
+                            </div>
+                        {% endfor %}
+                    {% endif %}
+                {% endwith %}
+                
+                <div class="d-flex justify-content-between align-items-center mb-4">
+                    <h2>Service Details</h2>
+                    <div>
+                        <a href="{{ url_for('CleaningServiceManagementUI.manage_services') }}" class="btn btn-outline-secondary">
+                            <i class="fas fa-arrow-left me-2"></i> Back to Services
+                        </a>
+                    </div>
+                </div>
+                
+                <div class="detail-container">
+                    <div class="card detail-card">
+                        <div class="card-header detail-header d-flex justify-content-between align-items-center">
+                            <h4>{{ service.title }}</h4>
+                            <span class="badge bg-{{ 'success' if service.status else 'danger' }} badge-large">
+                                {{ 'Active' if service.status else 'Inactive' }}
+                            </span>
+                        </div>
+                        <div class="card-body detail-body">
+                            <div class="row">
+                                <div class="col-md-8">
+                                    <div class="detail-item">
+                                        <div class="detail-label">Service ID:</div>
+                                        <div class="detail-value">{{ service.serviceID }}</div>
+                                    </div>
+                                    
+                                    <div class="detail-item">
+                                        <div class="detail-label">Category:</div>
+                                        <div class="detail-value">{{ service.category_name }}</div>
+                                    </div>
+                                    
+                                    <div class="detail-item">
+                                        <div class="detail-label">Price:</div>
+                                        <div class="detail-value price-highlight">${{ "%.2f"|format(service.price) }} /hour</div>
+                                    </div>
+                                    
+                                    <div class="detail-item">
+                                        <div class="detail-label">Created on:</div>
+                                        <div class="detail-value date-formatting">{{ service.created_at.strftime('%B %d, %Y at %I:%M %p') }}</div>
+                                    </div>
+                                    
+                                    <div class="detail-item">
+                                        <div class="detail-label">Description:</div>
+                                        <div class="detail-value service-description">
+                                            {% if service.description %}
+                                                {{ service.description }}
+                                            {% else %}
+                                                <em>No description provided</em>
+                                            {% endif %}
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <div class="col-md-4">
+                                    <div class="card mb-4">
+                                        <div class="card-header">
+                                            <h5>Service Statistics</h5>
+                                        </div>
+                                        <div class="card-body">
+                                            <div class="text-center mb-3">
+                                                <span class="fs-1 d-block">{{ service.shortlist_count }}</span>
+                                                <span class="text-muted">Times Shortlisted</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="action-buttons">
+                                        <div class="d-grid gap-2">
+                                            <a href="{{ url_for('CleaningServiceManagementUI.edit_service_form', service_id=service.serviceID) }}" class="btn btn-primary">
+                                                <i class="fas fa-edit me-2"></i> Edit Service
+                                            </a>
+                                            
+                                            {% if service.status %}
+                                            <!-- Suspend button for active services -->
+                                            <form action="{{ url_for('CleaningServiceManagementUI.suspend_service', service_id=service.serviceID) }}" method="post">
+                                                <button type="submit" class="btn btn-warning w-100" onclick="return confirm('Are you sure you want to deactivate this service?')">
+                                                    <i class="fa-solid fa-circle-pause me-2"></i> Suspend Service
+                                                </button>
+                                            </form>
+                                            {% else %}
+                                            <!-- Reactivate button for inactive services -->
+                                            <form action="{{ url_for('CleaningServiceManagementUI.reactivate_service', service_id=service.serviceID) }}" method="post">
+                                                <button type="submit" class="btn btn-success w-100" onclick="return confirm('Do you want to activate this service?')">
+                                                    <i class="fa-solid fa-circle-play me-2"></i> Activate Service
+                                                </button>
+                                            </form>
+                                            {% endif %}
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- Recent Shortlists Section -->
+                            {% if service.recent_shortlists %}
+                            <div class="shortlist-container mt-4">
+                                <h5><i class="fas fa-star me-2"></i> Recent Shortlists</h5>
+                                <div class="table-responsive">
+                                    <table class="table table-hover">
+                                        <thead>
+                                            <tr>
+                                                <th>#</th>
+                                                <th>Homeowner</th>
+                                                <th>Date Shortlisted</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            {% for shortlist in service.recent_shortlists %}
+                                            <tr>
+                                                <td>{{ loop.index }}</td>
+                                                <td>{{ shortlist.homeowner_name }}</td>
+                                                <td>{{ shortlist.created_at.strftime('%Y-%m-%d %H:%M') }}</td>
+                                            </tr>
+                                            {% endfor %}
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

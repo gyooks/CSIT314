@@ -4,6 +4,7 @@ from controller.cleaner.createCleaningServiceController import createCleaningSer
 from controller.cleaner.searchCleaningServiceController import searchCleaningServiceController
 from controller.cleaner.suspendCleaningServiceController import suspendCleaningServiceController
 from controller.cleaner.updateCleaningServiceController import updateCleaningServiceController
+from controller.cleaner.viewDetailServiceController import viewDetailServiceController
 from entity.Category import Category
 
 # Create Cleaner Service Management Blueprint
@@ -24,6 +25,27 @@ def manage_services():
     # Get all services for this cleaner with shortlist counts
     services = viewCleaningServiceController.get_cleaner_services_with_shortlist_count(cleaner_id)
     return render_template('cleaner/serviceManagementPage.html', services=services)
+
+# Service Detail View
+@CleaningServiceManagementUI_bp.route('/services/detail/<int:service_id>')
+def view_service_detail(service_id):
+    """
+    Display detailed information for a specific cleaning service
+    """
+    if 'user_id' not in session:
+        flash("You must be logged in to perform this action", "danger")
+        return redirect(url_for('cleaner_login.cleanerLogin'))
+    
+    cleaner_id = session['user_id']
+    
+    # Get service details with verification that it belongs to this cleaner
+    service_detail = viewDetailServiceController.get_service_detail(service_id, cleaner_id)
+    
+    if not service_detail:
+        flash("Service not found or you don't have permission to view it.", "danger")
+        return redirect(url_for('CleaningServiceManagementUI.manage_services'))
+    
+    return render_template('cleaner/serviceDetailPage.html', service=service_detail)
 
 # Create New Service - GET
 @CleaningServiceManagementUI_bp.route('/services/create', methods=['GET'])

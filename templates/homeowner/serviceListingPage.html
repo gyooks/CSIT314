@@ -73,7 +73,7 @@
                     <i class="fas fa-calendar me-2"></i> My Bookings
                 </a>
                 
-                <a href="#">
+                <a href="{{ url_for('homeowner_logout.homeownerLogout') }}">
                     <i class="fas fa-sign-out-alt me-2"></i> Logout
                 </a>
             </div>
@@ -149,16 +149,21 @@
                             </thead>
                             <tbody>
                                 {% if services %}
-                                    {% for service, cleaner, profile, category in services %}
+                                    {% for service, cleaner, category in services %}
                                         <tr>
                                             <td>{{ loop.index }}</td>
                                             <td>{{ service.title }}</td>
                                             <td>{{ category.name }}</td>
-                                            <td>{{ profile.first_name }} {{ profile.last_name }}</td>
+                                            <td>{{ cleaner.first_name }} {{ cleaner.last_name }}</td>
                                             <td>{{ service.description|truncate(50) }}</td>
                                             <td>${{ "%.2f"|format(service.price) }} / hour</td>
                                             <td>
                                                 <div class="action-buttons">
+                                                    
+                                                    <a href="{{ url_for('CleanerServiceManagementUI.get_service_detail', service_id=service.serviceID) }}" class="btn btn-sm btn-info" title="View Details">
+                                                        <i class="fas fa-eye"></i>
+                                                    </a>
+        
                                                     <form action="{{ url_for('CleanerServiceManagementUI.shortlist_service', service_id=service.serviceID) }}" method="post" class="d-inline">
                                                         <button type="submit" class="btn btn-sm btn-danger" title="Add to Shortlist">
                                                             <i class="fas fa-heart"></i>
@@ -192,7 +197,7 @@
     
     <!-- Book Service Modals -->
     {% if services %}
-        {% for service, cleaner, profile, category in services %}
+        {% for service, cleaner, category in services %}
             <div class="modal fade" id="bookServiceModal{{ service.serviceID }}" tabindex="-1" aria-labelledby="bookServiceModalLabel{{ service.serviceID }}" aria-hidden="true">
                 <div class="modal-dialog">
                     <div class="modal-content">
@@ -204,7 +209,7 @@
                             <p>You are about to book the following service:</p>
                             <ul class="list-group list-group-flush mb-3">
                                 <li class="list-group-item"><strong>Service:</strong> {{ service.title }}</li>
-                                <li class="list-group-item"><strong>Cleaner:</strong> {{ profile.first_name }} {{ profile.last_name }}</li>
+                                <li class="list-group-item"><strong>Cleaner:</strong> {{ cleaner.first_name }} {{ cleaner.last_name }}</li>
                                 <li class="list-group-item"><strong>Price:</strong> <span class="price">${{ "%.2f"|format(service.price) }} / hour</span></li>
                             </ul>
                             

@@ -139,27 +139,31 @@
                                     
                                     <td>{{ category.create_at.strftime('%Y-%m-%d') }}</td>
                                     <td>
-                                        <a href="{{ url_for('CategoryManagementUI.edit_category', category_id=category.categoryID) }}" class="btn btn-sm btn-info" title="Edit">
+                                        <!-- View Details button -->
+                                        <a href="{{ url_for('CategoryManagementUI.view_category_detail', category_id=category.categoryID) }}" class="btn btn-sm btn-info" title="View Details">
+                                            <i class="fas fa-eye"></i>
+                                        </a>
+                                        
+                                        <!-- Edit button -->
+                                        <a href="{{ url_for('CategoryManagementUI.edit_category', category_id=category.categoryID) }}" class="btn btn-sm btn-warning" title="Edit">
                                             <i class="fas fa-edit"></i>
                                         </a>
                                         
                                         {% if category.categoryStatus %}
                                         <!-- Suspend (Deactivate) button for active categories -->
                                         <form action="{{ url_for('CategoryManagementUI.suspend_category', category_id=category.categoryID) }}" method="post" style="display:inline;">
-                                            <button type="submit" class="btn btn-sm btn-warning" onclick="return confirm('Are you sure you want to deactivate this category?')" title="Deactivate">
+                                            <button type="submit" class="btn btn-sm btn-danger" onclick="return confirm('Are you sure you want to suspend this category?')" title="Deactivate">
                                                 <i class="fa-solid fa-circle-pause"></i>
                                             </button>
                                         </form>
                                         {% else %}
                                         <!-- Reactivate button for inactive categories -->
                                         <form action="{{ url_for('CategoryManagementUI.reactivate_category', category_id=category.categoryID) }}" method="post" style="display:inline;">
-                                            <button type="submit" class="btn btn-sm btn-success" onclick="return confirm('Do you want to activate this category?')" title="Activate">
+                                            <button type="submit" class="btn btn-sm btn-success" onclick="return confirm('Do you want to reactivate this category?')" title="Activate">
                                                 <i class="fa-solid fa-circle-play"></i>
                                             </button>
                                         </form>
                                         {% endif %}
-                                        
-                                     
                                     </td>
                                 </tr>
                                 {% endfor %}

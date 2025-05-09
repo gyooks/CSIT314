@@ -3,7 +3,7 @@ from db_config import db
 
 class createCategoryController:
     @staticmethod
-    def create_category(name, description, status):
+    def create_category(name, description):
         """
         Create a new category, ensuring no duplicate names
         """
@@ -12,11 +12,8 @@ class createCategoryController:
             if Category.find_by_name(name):
                 return False, "Category name already exists"
 
-            # Convert status string to boolean
-            category_status = (status == '1')
-
             # Create and save the new category
-            category = Category(name=name, description=description, categoryStatus=category_status)
+            category = Category(name=name, description=description)
             category.save_to_db()
             return True, "Category created successfully"
         except Exception as e:

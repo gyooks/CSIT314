@@ -1,9 +1,5 @@
 from datetime import datetime
 from db_config import db
-from entity.CleaningService import CleaningService
-from entity.UserAccount import User
-from entity.UserProfile import UserProfile
-from entity.Category import Category
 from sqlalchemy import or_
 
 class Shortlist(db.Model):
@@ -15,7 +11,17 @@ class Shortlist(db.Model):
     create_at = db.Column(db.DateTime, default=datetime.utcnow)
     
     # Relationships
-    homeowner = db.relationship('User', backref='shortlisted_services')
+    homeowner = db.relationship(
+        'User', 
+        foreign_keys=[homeownerID],
+        backref=db.backref('shortlisted_services', lazy=True)
+    )
+    
+    service = db.relationship(
+        'CleaningService',
+        backref=db.backref('shortlisted_by', lazy=True),
+        foreign_keys=[serviceID]
+    )
     
     def __init__(self, homeownerID, serviceID):
         self.homeownerID = homeownerID
@@ -135,21 +141,23 @@ class Shortlist(db.Model):
             homeowner_id (int): ID of the homeowner
             
         Returns:
-            list: List of tuples containing (shortlist, service, cleaner, cleaner_profile, category)
+            list: List of tuples containing (shortlist, service, cleaner, category)
         """
         try:
+            from entity.CleaningService import CleaningService
+            from entity.UserAccount import User
+            from entity.Category import Category
+            
             # Query shortlisted services with service, cleaner and category data
             results = (
                 db.session.query(
                     cls,
                     CleaningService,
                     User,
-                    UserProfile,
                     Category
                 )
                 .join(CleaningService, cls.serviceID == CleaningService.serviceID)
                 .join(User, CleaningService.cleanerID == User.userID)
-                .join(UserProfile, User.userID == UserProfile.user_id)
                 .join(Category, CleaningService.categoryID == Category.categoryID)
                 .filter(cls.homeownerID == homeowner_id)
                 .filter(CleaningService.serviceStatus == True)
@@ -162,7 +170,6 @@ class Shortlist(db.Model):
             print(f"Error getting homeowner shortlist: {str(e)}")
             return []
 
-
     @classmethod
     def search_homeowner_shortlist(cls, homeowner_id, keyword):
         """
@@ -173,9 +180,13 @@ class Shortlist(db.Model):
             keyword (str): Search keyword
             
         Returns:
-            list: List of tuples containing (shortlist, service, cleaner, cleaner_profile, category)
+            list: List of tuples containing (shortlist, service, cleaner, category)
         """
         try:
+            from entity.CleaningService import CleaningService
+            from entity.UserAccount import User
+            from entity.Category import Category
+            
             # Prepare search keyword
             search_term = f"%{keyword}%"
             
@@ -185,12 +196,10 @@ class Shortlist(db.Model):
                     cls,
                     CleaningService,
                     User,
-                    UserProfile,
                     Category
                 )
                 .join(CleaningService, cls.serviceID == CleaningService.serviceID)
                 .join(User, CleaningService.cleanerID == User.userID)
-                .join(UserProfile, User.userID == UserProfile.user_id)
                 .join(Category, CleaningService.categoryID == Category.categoryID)
                 .filter(cls.homeownerID == homeowner_id)
                 .filter(CleaningService.serviceStatus == True)
@@ -200,8 +209,8 @@ class Shortlist(db.Model):
                         CleaningService.title.ilike(search_term),
                         CleaningService.description.ilike(search_term),
                         Category.name.ilike(search_term),
-                        UserProfile.first_name.ilike(search_term),
-                        UserProfile.last_name.ilike(search_term)
+                        User.first_name.ilike(search_term),
+                        User.last_name.ilike(search_term)
                     )
                 )
                 .all()
@@ -211,3 +220,22 @@ class Shortlist(db.Model):
         except Exception as e:
             print(f"Error searching homeowner shortlist: {str(e)}")
             return []
+
+    @classmethod
+    def get_recent_by_service(cls, service_id, limit=5):
+        """
+        Get recent shortlists for a specific service
+        show in cleaning service detail for cleaner
+        
+        Args:
+            service_id (int): ID of the service
+            limit (int): Maximum number of shortlists to return
+        
+        Returns:
+            list: List of recent Shortlist objects
+        """
+        return (cls.query
+                .filter_by(serviceID=service_id)
+                .order_by(cls.create_at.desc())
+                .limit(limit)
+                .all())

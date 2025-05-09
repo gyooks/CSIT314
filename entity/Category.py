@@ -28,6 +28,14 @@ class Category(db.Model):
             'categoryStatus': self.categoryStatus,
             'create_at': self.create_at
         }
+
+    def get_services_count(self):
+        """Get the count of services associated with this category"""
+        try:
+            return len(self.services)
+        except Exception as e:
+            print(f"Error getting services count: {e}")
+            return 0
     
     # Database operations
     @classmethod

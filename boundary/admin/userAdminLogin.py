@@ -13,7 +13,7 @@ def userAdminLogin():
         success, message = controller.login(email, password)
         if success:
             flash("Login successful!", "success")
-            return redirect(url_for('admin_dashboard.dashboard'))
+            return redirect(url_for('user_management.view_users'))
         else:
             flash(message,"danger")
             return render_template('admin/userAdminLogin.html')

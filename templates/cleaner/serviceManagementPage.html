@@ -59,15 +59,15 @@
                     <h4>Cleaner Dashboard</h4>
                 </div>
                   
-                <a href="{{ url_for('CleaningServiceManagementUI.manage_services') }}" class="active">
+                <a href="{{ url_for('CleaningServiceManagementUI.manage_services') }}"class="active">
                     <i class="fas fa-broom me-2"></i> My Services
                 </a>
                 
-                <a href="{{ url_for('BookingManagementUI.manage_bookings') }}">
+                <a href="{{ url_for('BookingManagementUI.manage_bookings') }}" >
                     <i class="fas fa-calendar me-2"></i> My Bookings
                 </a>
                 
-                <a href="#">
+                <a href="{{ url_for('cleaner_logout.cleanerLogout') }}">
                     <i class="fas fa-sign-out-alt me-2"></i> Logout
                 </a>
             </div>
@@ -124,7 +124,6 @@
                                 <th>Title</th>
                                 <th>Category</th>
                                 <th>Price</th>
-                                <th>Shortlisted</th>
                                 <th>Status</th>
                                 <th>Created Date</th>
                                 <th>Actions</th>
@@ -144,9 +143,7 @@
                                         {% endif %}
                                     </td>
                                     <td>${{ "%.2f"|format(service.price) }} /hour</td>
-                                    <td class="text-center">
-                                        {{ service.shortlist_count }}
-                                    </td>
+                              
                                     <td>
                                         <span class="badge bg-{{ 'success' if service.serviceStatus else 'danger' }}">
                                             {{ 'Active' if service.serviceStatus else 'Inactive' }}
@@ -154,14 +151,18 @@
                                     </td>
                                     <td>{{ service.create_at.strftime('%Y-%m-%d') }}</td>
                                     <td>
-                                        <a href="{{ url_for('CleaningServiceManagementUI.edit_service_form', service_id=service.serviceID) }}" class="btn btn-sm btn-info" title="Edit">
+                                        <a href="{{ url_for('CleaningServiceManagementUI.view_service_detail', service_id=service.serviceID) }}" class="btn btn-sm btn-info" title="View Details">
+                                            <i class="fas fa-eye"></i>
+                                        </a>
+                                        
+                                        <a href="{{ url_for('CleaningServiceManagementUI.edit_service_form', service_id=service.serviceID) }}" class="btn btn-sm btn-warning" title="Edit">
                                             <i class="fas fa-edit"></i>
                                         </a>
                                         
                                         {% if service.serviceStatus %}
                                         <!-- Suspend (Deactivate) button for active services -->
                                         <form action="{{ url_for('CleaningServiceManagementUI.suspend_service', service_id=service.serviceID) }}" method="post" style="display:inline;">
-                                            <button type="submit" class="btn btn-sm btn-warning" onclick="return confirm('Are you sure you want to deactivate this service?')" title="Deactivate">
+                                            <button type="submit" class="btn btn-sm btn-danger" onclick="return confirm('Are you sure you want to deactivate this service?')" title="Deactivate">
                                                 <i class="fa-solid fa-circle-pause"></i>
                                             </button>
                                         </form>

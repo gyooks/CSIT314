@@ -2,47 +2,30 @@ from entity.UserProfile import UserProfile
 
 class SuspendProfileController:
     @staticmethod
-    def suspend_profile(profile_id):
-        """
-        Suspend a user profile by setting isActive to False
+    def suspend_profile(role_id):
+        """Suspend a user profile/role"""
         
-        Returns:
-            tuple: (success_bool, message_str)
-        """
+        profile = UserProfile.find_by_id(role_id)
+        if not profile:
+            return False, "User role not found"
+        
         try:
-            # Find profile by ID
-            profile = UserProfile.find_by_profile_id(profile_id)
-            
-            if not profile:
-                return False, "Profile not found"
-                
-            # Suspend the profile
             profile.suspend()
-            
-            return True, "Profile suspended successfully"
-                
+            return True, f"User role '{profile.role_name}' has been suspended"
         except Exception as e:
-            return False, f"Error suspending profile: {str(e)}"
+            return False, f"Error suspending user role: {str(e)}"
     
     @staticmethod
-    def reactivate_profile(profile_id):
-        """
-        Reactivate a suspended profile by setting isActive to True
+    def reactivate_profile(role_id):
+        """Reactivate a suspended user profile/role"""
         
-        Returns:
-            tuple: (success_bool, message_str)
-        """
+        profile = UserProfile.find_by_id(role_id)
+        if not profile:
+            return False, "User role not found"
+        
         try:
-            # Find profile by ID
-            profile = UserProfile.find_by_profile_id(profile_id)
-            
-            if not profile:
-                return False, "Profile not found"
-                
-            # Reactivate the profile
             profile.reactivate()
-            
-            return True, "Profile reactivated successfully"
-                
+            return True, f"User role '{profile.role_name}' has been reactivated"
         except Exception as e:
-            return False, f"Error reactivating profile: {str(e)}"
+            return False, f"Error reactivating user role: {str(e)}"
+

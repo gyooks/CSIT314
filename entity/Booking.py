@@ -16,6 +16,19 @@ class Booking(db.Model):
     totalPrice = db.Column(db.Numeric(10, 2))
     bookingStatus = db.Column(db.String(50))
     
+    # Relationship with User (homeowner and cleaner)
+    homeowner = db.relationship(
+        'User', 
+        foreign_keys=[homeownerID],
+        backref=db.backref('homeowner_bookings', lazy=True)
+    )
+    
+    cleaner = db.relationship(
+        'User',
+        foreign_keys=[cleanerID],
+        backref=db.backref('cleaner_bookings', lazy=True)
+    )
+    
     def __init__(self, homeownerID, serviceID, cleanerID, bookingDate, bookingHour, totalPrice, bookingStatus):
         self.homeownerID = homeownerID
         self.serviceID = serviceID
@@ -78,18 +91,14 @@ class Booking(db.Model):
             list: List of bookings with associated details
         """
         from entity.UserAccount import User
-        from entity.UserProfile import UserProfile
         from entity.CleaningService import CleaningService
         
         return db.session.query(
             cls,
             User,
-            UserProfile,
             CleaningService
         ).join(
             User, cls.homeownerID == User.userID
-        ).join(
-            UserProfile, User.userID == UserProfile.user_id
         ).join(
             CleaningService, cls.serviceID == CleaningService.serviceID
         ).filter(
@@ -111,18 +120,14 @@ class Booking(db.Model):
             list: List of filtered bookings with details
         """
         from entity.UserAccount import User
-        from entity.UserProfile import UserProfile
         from entity.CleaningService import CleaningService
         
         return db.session.query(
             cls,
             User,
-            UserProfile,
             CleaningService
         ).join(
             User, cls.homeownerID == User.userID
-        ).join(
-            UserProfile, User.userID == UserProfile.user_id
         ).join(
             CleaningService, cls.serviceID == CleaningService.serviceID
         ).filter(
@@ -142,11 +147,10 @@ class Booking(db.Model):
             status (str, optional): Filter by booking status
             
         Returns:
-            list: List of tuples containing (booking, cleaner, cleaner_profile, service)
+            list: List of tuples containing (booking, cleaner, service)
         """
         try:
             from entity.UserAccount import User
-            from entity.UserProfile import UserProfile
             from entity.CleaningService import CleaningService
             
             # Start query
@@ -154,11 +158,9 @@ class Booking(db.Model):
                 db.session.query(
                     cls,
                     User,
-                    UserProfile,
                     CleaningService
                 )
                 .join(User, cls.cleanerID == User.userID)
-                .join(UserProfile, User.userID == UserProfile.user_id)
                 .join(CleaningService, cls.serviceID == CleaningService.serviceID)
                 .filter(cls.homeownerID == homeowner_id)
             )
@@ -185,11 +187,10 @@ class Booking(db.Model):
             keyword (str): Search keyword
             
         Returns:
-            list: List of tuples containing (booking, cleaner, cleaner_profile, service)
+            list: List of tuples containing (booking, cleaner, service)
         """
         try:
             from entity.UserAccount import User
-            from entity.UserProfile import UserProfile
             from entity.CleaningService import CleaningService
             
             # Search in service title, cleaner name, and booking status
@@ -199,18 +200,16 @@ class Booking(db.Model):
                 db.session.query(
                     cls,
                     User,
-                    UserProfile,
                     CleaningService
                 )
                 .join(User, cls.cleanerID == User.userID)
-                .join(UserProfile, User.userID == UserProfile.user_id)
                 .join(CleaningService, cls.serviceID == CleaningService.serviceID)
                 .filter(cls.homeownerID == homeowner_id)
                 .filter(
                     or_(
                         CleaningService.title.ilike(search_term),
-                        UserProfile.first_name.ilike(search_term),
-                        UserProfile.last_name.ilike(search_term),
+                        User.first_name.ilike(search_term),
+                        User.last_name.ilike(search_term),
                         cls.bookingStatus.ilike(search_term)
                     )
                 )

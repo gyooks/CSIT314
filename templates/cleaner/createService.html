@@ -51,15 +51,15 @@
                     <h4>Cleaner Dashboard</h4>
                 </div>
                   
-                <a href="{{ url_for('CleaningServiceManagementUI.manage_services') }}" class="active">
+                <a href="{{ url_for('CleaningServiceManagementUI.manage_services') }}"class="active">
                     <i class="fas fa-broom me-2"></i> My Services
                 </a>
                 
-                <a href="#">
+                <a href="{{ url_for('BookingManagementUI.manage_bookings') }}" >
                     <i class="fas fa-calendar me-2"></i> My Bookings
                 </a>
                 
-                <a href="#">
+                <a href="{{ url_for('cleaner_logout.cleanerLogout') }}">
                     <i class="fas fa-sign-out-alt me-2"></i> Logout
                 </a>
             </div>

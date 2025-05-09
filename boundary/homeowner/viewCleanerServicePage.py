@@ -1,5 +1,6 @@
 from flask import Blueprint, render_template, request, redirect, url_for, flash, session
 from controller.homeowner.viewServiceController import viewCleanerServiceController
+from controller.homeowner.viewDetailCleanerServiceController import viewDetailCleanerServiceController
 from controller.homeowner.shortlistServiceController import shortlistServiceController
 from controller.homeowner.bookingServiceController import BookingServiceController
 from entity.Category import Category
@@ -45,6 +46,39 @@ def view_services():
                            shortlisted_services=shortlisted_services,
                            today=today)
 
+@CleanerServiceManagementUI_bp.route('/services/detail/<int:service_id>')
+def get_service_detail(service_id):
+    """
+    Display detailed information about a specific cleaning service
+    """
+    if 'user_id' not in session:
+        flash("You must be logged in to perform this action", "danger")
+        return redirect(url_for('homeowner_login.homeownerLogin'))
+    
+    homeowner_id = session['user_id']
+    
+    # Get service details
+    service_details = viewDetailCleanerServiceController.get_service_detail(service_id)
+    
+    if not service_details:
+        flash("Service not found or no longer available", "danger")
+        return redirect(url_for('CleanerServiceManagementUI.view_services'))
+    
+    service, cleaner, category = service_details
+    
+    # Get shortlisted service IDs for this homeowner to check if this service is shortlisted
+    shortlisted_services = viewCleanerServiceController.get_shortlisted_service_ids(homeowner_id)
+    is_shortlisted = service.serviceID in shortlisted_services
+    
+    # Get today's date for the booking form
+    today = datetime.now().strftime('%Y-%m-%d')
+    
+    return render_template('homeowner/serviceDetailPage.html', 
+                          service=service,
+                          cleaner=cleaner,
+                          category=category,
+                          is_shortlisted=is_shortlisted,
+                          today=today)
 
 # Shortlist Service
 @CleanerServiceManagementUI_bp.route('/services/shortlist/<int:service_id>', methods=['POST'])
