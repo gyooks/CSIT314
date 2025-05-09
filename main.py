@@ -16,6 +16,7 @@ from boundary.platformManager.platformManagerLogout import platformManager_logou
 from boundary.cleaner.cleaningServiceBoundary import CleaningServiceManagementUI_bp
 from boundary.cleaner.bookingManagementBoundary import BookingManagementUI_bp
 from boundary.cleaner.cleanerLogin import cleaner_login_bp 
+from boundary.cleaner.cleanerLogout import cleaner_logout_bp
 
 from boundary.homeowner.viewCleanerServicePage import CleanerServiceManagementUI_bp
 from boundary.homeowner.viewBookingPage import viewBookingPage_bp
