@@ -10,3 +10,4 @@ def cleanerLogout():
     controller.logout()
     flash("You have been logged out.", "success")
     return redirect(url_for('cleaner_login.cleanerLogin'))
+
