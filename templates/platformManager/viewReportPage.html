@@ -193,7 +193,16 @@
                                     });
                                 </script>
                             {% endif %}
-                            
+                            {% if report_data.predicted_next_day_bookings is not none %}
+                        <div class="row mb-4">
+                            <div class="col-md-3">
+                                <div class="stat-card" style="border-left-color: #20c997;">
+                                    <h5>Predicted Bookings (Tomorrow)</h5>
+                                    <h3>{{ report_data.predicted_next_day_bookings }}</h3>
+                                </div>
+                            </div>
+                        </div>
+                        {% endif %}
                         {% elif report.reportType == 'Weekly Report' %}
                             <!-- Weekly Report Display -->
                             <div class="row mb-4">
@@ -310,6 +319,17 @@
                                     });
                                 </script>
                             {% endif %}
+                            {% if report_data.predicted_next_week_bookings is not none %}
+                        <div class="row mb-4">
+                            <div class="col-md-3">
+                                <div class="stat-card" style="border-left-color: #0dcaf0;">
+                                    <h5>Predicted Bookings (Next Week)</h5>
+                                    <h3>{{ report_data.predicted_next_week_bookings }}</h3>
+                                </div>
+                            </div>
+                        </div>
+                        {% endif %}
+
                             
                         {% elif report.reportType == 'Monthly Report' %}
                             <!-- Monthly Report Display -->
@@ -461,6 +481,17 @@
                                     });
                                 </script>
                             {% endif %}
+                            {% if report_data.predicted_next_month_bookings is not none %}
+                        <div class="row mb-4">
+                            <div class="col-md-3">
+                                <div class="stat-card" style="border-left-color: #6610f2;">
+                                    <h5>Predicted Bookings (Next Month)</h5>
+                                    <h3>{{ report_data.predicted_next_month_bookings }}</h3>
+                                </div>
+                            </div>
+                        </div>
+                        {% endif %}
+
                         {% endif %}
                     {% else %}
                         <div class="alert alert-warning">
