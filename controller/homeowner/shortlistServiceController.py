@@ -70,24 +70,6 @@ class ShortlistServiceController:
         # If empty, could add a message here if needed
         return results
 
-    def search_shortlist(self, homeowner_id, keyword):
-        """
-        Search through homeowner's shortlisted services
-        
-        Args:
-            homeowner_id (int): ID of the homeowner
-            keyword (str): Search keyword
-            
-        Returns:
-            list: List of tuples containing (shortlist, service, cleaner, cleaner_profile, category)
-        """
-        if not keyword or keyword.strip() == "":
-            # If keyword is empty, return all shortlisted services
-            return self.get_homeowner_shortlist(homeowner_id)
-        
-        # Search in shortlisted services
-        results = Shortlist.search_homeowner_shortlist(homeowner_id, keyword)
-        return results
-
+    
 # Create controller instance
 shortlistServiceController = ShortlistServiceController()
