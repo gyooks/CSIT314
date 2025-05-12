@@ -93,7 +93,10 @@ class GenerateWeeklyReportController(ReportBaseController):
                 if cid:
                     if cid not in cleaner_stats:
                         cleaner = User.find_by_id(cid)
-                        name = f"{cleaner.profile.first_name} {cleaner.profile.last_name}" if cleaner and cleaner.profile else f"Cleaner {cid}"
+                        profile = cleaner.profile
+                        fname = getattr(profile, 'fname', '')
+                        lname = getattr(profile, 'lname', '')
+                        name = f"{fname} {lname}".strip() if profile else f"Cleaner {cid}"
                         cleaner_stats[cid] = {'name': name, 'bookings': 0, 'revenue': 0.0}
                     cleaner_stats[cid]['bookings'] += 1
                     cleaner_stats[cid]['revenue'] += float(b.totalPrice or 0)

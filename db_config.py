@@ -1,5 +1,6 @@
 import os
 from flask_sqlalchemy import SQLAlchemy
+import pymysql
 
 db = SQLAlchemy()
 
@@ -16,3 +17,11 @@ def configure_db(app):
     db.init_app(app)
     
     return db 
+
+def get_connection():
+    return pymysql.connect(
+        host=os.getenv("DB_HOST", "localhost"),
+        user=os.getenv("DB_USER", "root"),
+        password=os.getenv("DB_PASSWORD", "xyyong003"),
+        database=os.getenv("DB_NAME", "cms")
+    )
