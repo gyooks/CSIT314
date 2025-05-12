@@ -117,14 +117,14 @@ def update_user(target_user_id):
     if 'user_id' not in session:
         flash("You must be logged in to perform this action", "danger")
         return redirect(url_for('admin_login.userAdminLogin'))
-    
+        
     # GET request - show the update form
     if request.method == 'GET':
-        # Get user from controller
-        user = UpdateUserAccController.get_user_by_id(target_user_id)
+        # Get user from controller with the combined method
+        success, message, user = UpdateUserAccController.update_user(target_user_id)
         
-        if not user:
-            flash("User not found", "error")
+        if not success:
+            flash(message, "error")
             return redirect(url_for('user_management.view_users'))
         
         # Get all available roles/profiles for dropdown
@@ -133,7 +133,7 @@ def update_user(target_user_id):
         
         # Render update user form
         return render_template('admin/edit_user.html', user=user, profiles=profiles)
-    
+        
     # POST request - update the user
     elif request.method == 'POST':
         # Get form data
@@ -144,10 +144,9 @@ def update_user(target_user_id):
         last_name = request.form.get('last_name')
         address = request.form.get('address')
         phone = request.form.get('phone')
-
         
         # Update user through controller
-        success, message = UpdateUserAccController.update_user(
+        success, message, user = UpdateUserAccController.update_user(
             user_id=target_user_id,
             email=email,
             role_id=int(role_id) if role_id else None,
@@ -156,7 +155,6 @@ def update_user(target_user_id):
             last_name=last_name,
             address=address,
             phone=phone,
-          
         )
         
         if success:
@@ -164,9 +162,9 @@ def update_user(target_user_id):
             return redirect(url_for('user_management.view_users'))
         else:
             flash(f"Error updating user: {message}", "error")
-            user = UpdateUserAccController.get_user_by_id(target_user_id)
+            from entity.UserProfile import UserProfile
             profiles = UserProfile.get_all_active()
-            return render_template('admin/editUser.html', user=user, profiles=profiles)
+            return render_template('admin/edit_user.html', user=user or {}, profiles=profiles)
 
 
 # Suspend/Reactivate user routes

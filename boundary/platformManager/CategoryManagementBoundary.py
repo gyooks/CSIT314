@@ -86,55 +86,52 @@ def create_category():
     
     return redirect(url_for('CategoryManagementUI.manage_categories'))
 
-# Edit Category - GET
-@CategoryManagementUI_bp.route('/categories/edit/<int:category_id>', methods=['GET'])
-def edit_category_form(category_id):
+@CategoryManagementUI_bp.route('/categories/edit/<int:category_id>', methods=['GET', 'POST'])
+def edit_category(category_id):
     """
-    Show category edit form
+    Show and process category edit form
     """
     if 'user_id' not in session:
         flash("You must be logged in to perform this action", "danger")
         return redirect(url_for('admin_login.userAdminLogin'))
-    user_id = session['user_id']
-
-    # Get category by ID
-    category = updateCategoryController.get_category_by_id(category_id)
     
-    if not category:
-        flash("Category not found.", "danger")
+    # GET request - show the edit form
+    if request.method == 'GET':
+        # Get category by ID using combined method
+        success, message, category = updateCategoryController.update_category(category_id)
+        
+        if not success:
+            flash(message, "danger")
+            return redirect(url_for('CategoryManagementUI.manage_categories'))
+            
+        return render_template('platformManager/editCategory.html', category=category)
+    
+    # POST request - process form submission
+    elif request.method == 'POST':
+        # Get form data
+        name = request.form.get('name')
+        description = request.form.get('description')
+        status = request.form.get('categoryStatus')
+        
+        # Validate form data
+        if not name:
+            flash("Category name is required", "danger")
+            return redirect(url_for('CategoryManagementUI.edit_category', category_id=category_id))
+            
+        # Update category
+        success, message, category = updateCategoryController.update_category(
+            category_id, 
+            name, 
+            description, 
+            status
+        )
+        
+        if success:
+            flash(message, "success")
+        else:
+            flash(message, "danger")
+            
         return redirect(url_for('CategoryManagementUI.manage_categories'))
-    
-    return render_template('platformManager/editCategory.html', category=category)
-
-# Edit Category - POST
-@CategoryManagementUI_bp.route('/categories/edit/<int:category_id>', methods=['POST'])
-def edit_category(category_id):
-    """
-    Process category edit form
-    """
-    # if 'user_id' not in session:
-    #     flash("You must be logged in to perform this action", "danger")
-    #     return redirect(url_for('platform_manager_login.userManagerLogin'))
-    
-    # Get form data
-    name = request.form.get('name')
-    description = request.form.get('description')
-    status = request.form.get('categoryStatus')
-    
-    # Validate form data
-    if not name:
-        flash("Category name is required", "danger")
-        return redirect(url_for('CategoryManagementUI.edit_category_form', category_id=category_id))
-    
-    # Update category
-    success = updateCategoryController.update_category(category_id, name, description, status)
-    
-    if success:
-        flash("Category updated successfully!", "success")
-    else:
-        flash("Failed to update category.", "danger")
-    
-    return redirect(url_for('CategoryManagementUI.manage_categories'))
 
 
 

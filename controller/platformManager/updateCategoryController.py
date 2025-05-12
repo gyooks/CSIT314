@@ -3,35 +3,30 @@ from db_config import db
 
 class updateCategoryController:
     @staticmethod
-    def update_category(category_id, name, description, status):
+    def update_category(category_id, name=None, description=None, status=None):
         """
-        Update category attributes
+        Get category and update information if data is provided
         """
         try:
+            # Find the category
             category = Category.find_by_id(category_id)
-            if not category:
-                return False
-                
-            # Convert status string to boolean
-            category_status = category.categoryStatus
             
-            category.update_in_db(name, description, category_status)
-            return True
+            if not category:
+                return False, "Category not found", None
+                
+            # If no update data is provided, just return the category (for GET requests)
+            if all(param is None for param in [name, description, status]):
+                return True, "Category retrieved", category.to_dict()
+                
+            # Update category if data is provided
+            if any(param is not None for param in [name, description, status]):
+                # Use existing status if not provided
+                category_status = status if status is not None else category.categoryStatus
+                
+                category.update_in_db(name, description, category_status)
+                return True, "Category updated successfully", category.to_dict()
+                
         except Exception as e:
-            print(f"Error updating category: {e}")
+            print(f"Error handling category: {e}")
             db.session.rollback()
-            return False
-        
-    @staticmethod
-    def get_category_by_id(category_id):
-        """
-        Get category by ID
-        """
-        try:
-            category = Category.find_by_id(category_id)
-            if category:
-                return category.to_dict()
-            return None
-        except Exception as e:
-            print(f"Error getting category: {e}")
-            return None
+            return False, f"Error: {str(e)}", None

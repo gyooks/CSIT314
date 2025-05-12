@@ -103,73 +103,62 @@ def create_service():
     
     return redirect(url_for('CleaningServiceManagementUI.manage_services'))
 
-# Edit Service - GET
-@CleaningServiceManagementUI_bp.route('/services/edit/<int:service_id>', methods=['GET'])
-def edit_service_form(service_id):
-    """
-    Show service edit form
-    """
-    if 'user_id' not in session:
-        flash("You must be logged in to perform this action", "danger")
-        return redirect(url_for('cleaner_login.cleanerLogin'))
-    
-    cleaner_id = session['user_id']
-    
-    # Get service by ID
-    service = updateCleaningServiceController.get_service_by_id(service_id)
-    
-    if not service:
-        flash("Service not found.", "danger")
-        return redirect(url_for('CleaningServiceManagementUI.manage_services'))
-    
-    # Check if this service belongs to the logged-in cleaner
-    if service.cleanerID != cleaner_id:
-        flash("You do not have permission to edit this service.", "danger")
-        return redirect(url_for('CleaningServiceManagementUI.manage_services'))
-    
-    # Get all active categories for the dropdown
-    categories = Category.get_all_active()
-    
-    return render_template('cleaner/editService.html', service=service, categories=categories)
-
-# Edit Service - POST
-@CleaningServiceManagementUI_bp.route('/services/edit/<int:service_id>', methods=['POST'])
+@CleaningServiceManagementUI_bp.route('/services/edit/<int:service_id>', methods=['GET', 'POST'])
 def edit_service(service_id):
     """
-    Process service edit form
+    Handle both displaying the edit form (GET) and processing the form submission (POST)
+    for cleaning service editing
     """
+    # Authentication check
     if 'user_id' not in session:
         flash("You must be logged in to perform this action", "danger")
         return redirect(url_for('cleaner_login.cleanerLogin'))
     
     cleaner_id = session['user_id']
     
-    # Verify ownership of service
-    service = updateCleaningServiceController.get_service_by_id(service_id)
-    if not service or service.cleanerID != cleaner_id:
-        flash("You do not have permission to edit this service.", "danger")
+    if request.method == 'GET':
+        # Get service by ID
+        success, service = updateCleaningServiceController.update_service(service_id, None, None, None, None)
+        
+        if not service:
+            flash("Service not found.", "danger")
+            return redirect(url_for('CleaningServiceManagementUI.manage_services'))
+        
+        # Check if this service belongs to the logged-in cleaner
+        if service.cleanerID != cleaner_id:
+            flash("You do not have permission to edit this service.", "danger")
+            return redirect(url_for('CleaningServiceManagementUI.manage_services'))
+        
+        # Get all active categories for the dropdown
+        categories = Category.get_all_active()
+        return render_template('cleaner/editService.html', service=service, categories=categories)
+    
+    elif request.method == 'POST':
+        # Get form data
+        title = request.form.get('title')
+        description = request.form.get('description')
+        price = request.form.get('price')
+        category_id = request.form.get('category_id')
+        
+        # Update service (which also retrieves it first)
+        success, service = updateCleaningServiceController.update_service(service_id, title, description, price, category_id)
+        
+        # Verify ownership of service if service exists
+        if not service or service.cleanerID != cleaner_id:
+            flash("You do not have permission to edit this service.", "danger")
+            return redirect(url_for('CleaningServiceManagementUI.manage_services'))
+        
+        # Handle validation error
+        if not title:
+            flash("Service title is required", "danger")
+            return redirect(url_for('CleaningServiceManagementUI.edit_service', service_id=service_id))
+        
+        if success:
+            flash("Service updated successfully!", "success")
+        else:
+            flash("Failed to update service.", "danger")
+        
         return redirect(url_for('CleaningServiceManagementUI.manage_services'))
-    
-    # Get form data
-    title = request.form.get('title')
-    description = request.form.get('description')
-    price = request.form.get('price')
-    category_id = request.form.get('category_id')
-    
-    # Validate form data
-    if not title:
-        flash("Service title is required", "danger")
-        return redirect(url_for('CleaningServiceManagementUI.edit_service_form', service_id=service_id))
-    
-    # Update service
-    success = updateCleaningServiceController.update_service(service_id, title, description, price, category_id)
-    
-    if success:
-        flash("Service updated successfully!", "success")
-    else:
-        flash("Failed to update service.", "danger")
-    
-    return redirect(url_for('CleaningServiceManagementUI.manage_services'))
 
 
 
@@ -184,12 +173,6 @@ def suspend_service(service_id):
         return redirect(url_for('cleaner_login.cleanerLogin'))
     
     cleaner_id = session['user_id']
-    
-    # Verify ownership before suspension
-    service = updateCleaningServiceController.get_service_by_id(service_id)
-    if not service or service.cleanerID != cleaner_id:
-        flash("You do not have permission to suspend this service.", "danger")
-        return redirect(url_for('CleaningServiceManagementUI.manage_services'))
     
     # Suspend service
     success, message = suspendCleaningServiceController.suspend_service(service_id)
@@ -212,13 +195,7 @@ def reactivate_service(service_id):
         return redirect(url_for('cleaner_login.cleanerLogin'))
     
     cleaner_id = session['user_id']
-    
-    # Verify ownership before reactivation
-    service = updateCleaningServiceController.get_service_by_id(service_id)
-    if not service or service.cleanerID != cleaner_id:
-        flash("You do not have permission to reactivate this service.", "danger")
-        return redirect(url_for('CleaningServiceManagementUI.manage_services'))
-    
+
     # Reactivate service
     success, message = suspendCleaningServiceController.reactivate_service(service_id)
     
