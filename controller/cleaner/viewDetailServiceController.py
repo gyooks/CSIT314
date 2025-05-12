@@ -4,19 +4,11 @@ from entity.UserAccount import User
 from entity.Shortlist import Shortlist
 
 class ViewDetailServiceController:
-    """
-    Controller for viewing detailed cleaning service information
-    """
-    
     def get_service_detail(self, service_id, cleaner_id):
         """
         Get detailed information for a specific cleaning service,
         with verification that it belongs to the specified cleaner.
-        
-        Args:
-            service_id (int): ID of the service to view
-            cleaner_id (int): ID of the cleaner requesting to view the service
-        
+            
         Returns:
             dict: Detailed service information including related stats and data,
                   or None if service not found or not owned by this cleaner
@@ -34,8 +26,25 @@ class ViewDetailServiceController:
         # Get shortlist information
         shortlist_count = CleaningService.get_shortlist_count(service_id)
         
-        # Get recent shortlist users (limited to 5)
-        recent_shortlists = self.get_recent_shortlists(service_id)
+        # Get recent shortlist users (limited to 10)
+        try:
+            # Retrieve recent shortlists with user information
+            shortlists = Shortlist.get_recent_by_service(service_id, limit=10)
+            
+            # Format shortlist data
+            recent_shortlists = []
+            for shortlist in shortlists:
+                user = User.find_by_id(shortlist.homeownerID)
+                
+                recent_shortlists.append({
+                    'shortlist_id': shortlist.shortlistID,
+                    'homeowner_id': shortlist.homeownerID,
+                    'homeowner_name': f"{user.first_name} {user.last_name}" if user else "Unknown User",
+                    'created_at': shortlist.create_at
+                })
+        except Exception as e:
+            print(f"Error retrieving shortlists: {str(e)}")
+            recent_shortlists = []
         
         # Create a comprehensive service detail dictionary
         service_detail = {
@@ -60,39 +69,6 @@ class ViewDetailServiceController:
         }
         
         return service_detail
-    
-    def get_recent_shortlists(self, service_id, limit=5):
-        """
-        Get recent shortlists for a specific service
-        
-        Args:
-            service_id (int): ID of the service
-            limit (int): Maximum number of shortlists to return
-        
-        Returns:
-            list: List of recent shortlists with user information
-        """
-        try:
-            # Retrieve recent shortlists with user information
-            shortlists = Shortlist.get_recent_by_service(service_id, limit)
-            
-            # Format shortlist data
-            shortlist_data = []
-            for shortlist in shortlists:
-                user = User.find_by_id(shortlist.homeownerID)
-                
-                shortlist_data.append({
-                    'shortlist_id': shortlist.shortlistID,
-                    'homeowner_id': shortlist.homeownerID,
-                    'homeowner_name': f"{user.first_name} {user.last_name}" if user else "Unknown User",
-                    'created_at': shortlist.create_at
-                })
-            
-            return shortlist_data
-            
-        except Exception as e:
-            print(f"Error retrieving shortlists: {str(e)}")
-            return []
 
 # Create an instance of the controller
 viewDetailServiceController = ViewDetailServiceController()

@@ -23,7 +23,7 @@ def manage_services():
     cleaner_id = session['user_id']
     
     # Get all services for this cleaner with shortlist counts
-    services = viewCleaningServiceController.get_cleaner_services_with_shortlist_count(cleaner_id)
+    services = viewCleaningServiceController.get_cleaner_services(cleaner_id)
     return render_template('cleaner/serviceManagementPage.html', services=services)
 
 # Service Detail View
