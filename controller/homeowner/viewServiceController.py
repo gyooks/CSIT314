@@ -23,17 +23,7 @@ class ViewCleanerServiceController:
         """
         return CleaningService.get_services_by_category_with_details(category_id)
     
-    def search_services(self, keyword):
-        """
-        Search active cleaning services by keyword with cleaner info
-        
-        Args:
-            keyword (str): Search keyword
-            
-        Returns:
-            list: List of tuples containing (service, cleaner, cleaner_profile, category)
-        """
-        return CleaningService.search_services_with_details(keyword)
+
     
     
     def get_shortlisted_service_ids(self, homeowner_id):

@@ -3,7 +3,8 @@ from entity.CleaningService import CleaningService
 from entity.UserAccount import User
 from datetime import datetime
 
-def create_booking(self, homeowner_id, service_id, booking_date, hours):
+class createBookingController:
+    def create_booking(self, homeowner_id, service_id, booking_date, hours):
         """
         Create a new booking for a service
         

@@ -1,11 +1,10 @@
 from entity.Category import Category
 from db_config import db
 
-class suspendCategoryController:
-    @staticmethod
-    def suspend_category(category_id):
+@staticmethod
+def reactivate_category(category_id):
         """
-        Suspend a category by setting status to False
+        Reactivate a suspended category by setting categoryStatus to True
         """
         try:
             # Find category by ID
@@ -14,14 +13,11 @@ class suspendCategoryController:
             if not category:
                 return False, "Category not found"
             
-            # Set status to False (suspended)
-            category.suspend()
+            # Set categoryStatus to True (reactivated)
+            category.reactivate()
             
-            return True, "Category suspended successfully"
+            return True, "Category reactivated successfully"
         
         except Exception as e:
             db.session.rollback()
-            return False, f"Error suspending category: {str(e)}"
-
-    
-    
+            return False, f"Error reactivating category: {str(e)}"
