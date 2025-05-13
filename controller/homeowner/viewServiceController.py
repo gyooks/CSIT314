@@ -24,8 +24,6 @@ class ViewCleanerServiceController:
         return CleaningService.get_services_by_category_with_details(category_id)
     
 
-    
-    
     def get_shortlisted_service_ids(self, homeowner_id):
         """
         Get list of service IDs shortlisted by a homeowner
@@ -50,18 +48,7 @@ class ViewCleanerServiceController:
             bool: True if service is shortlisted, False otherwise
         """
         return Shortlist.is_service_shortlisted(homeowner_id, service_id)
-        
-    def get_homeowner_shortlist(self, homeowner_id):
-        """
-        Get all shortlisted services for a homeowner with service and cleaner info
-        
-        Args:
-            homeowner_id (int): ID of the homeowner
-            
-        Returns:
-            list: List of tuples containing (shortlist, service, cleaner, cleaner_profile, category)
-        """
-        return Shortlist.get_homeowner_shortlist(homeowner_id)
+
 
 
 # Create controller instance

@@ -4,7 +4,6 @@ from entity.Category import Category
 
 class ShortlistServiceController:
     
-    
     def remove_from_shortlist(self, homeowner_id, service_id):
         """
         Remove a service from the homeowner's shortlist
@@ -28,8 +27,6 @@ class ShortlistServiceController:
         else:
             return False, "An error occurred while removing from shortlist"
     
-
-
     
 # Create controller instance
 shortlistServiceController = ShortlistServiceController()

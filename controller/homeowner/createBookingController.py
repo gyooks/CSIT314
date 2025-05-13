@@ -4,7 +4,8 @@ from entity.UserAccount import User
 from datetime import datetime
 
 class createBookingController:
-    def create_booking(self, homeowner_id, service_id, booking_date, hours):
+    @staticmethod
+    def create_booking(homeowner_id, service_id, booking_date, hours):
         """
         Create a new booking for a service
         

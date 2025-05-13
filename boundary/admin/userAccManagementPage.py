@@ -5,6 +5,7 @@ from controller.admin.searchUserAccController import SearchUserAccController
 from controller.admin.suspendUserAccController import SuspendUserAccController
 from controller.admin.updateUserAccController import UpdateUserAccController
 from controller.admin.createUserAccController import createUserAccController
+from controller.admin.reactivateUserAccController import reactivateUserAccController
 
 from db_config import db
 from entity.UserProfile import UserProfile
@@ -200,7 +201,7 @@ def reactivate_user(target_user_id):
         return redirect(url_for('admin_login.userAdminLogin'))
     
     # Reactivate user through controller
-    success, message = SuspendUserAccController.reactivate_user(target_user_id)
+    success, message = reactivateUserAccController.reactivate_user(target_user_id)
     
     if success:
         flash("User reactivated successfully", "success")

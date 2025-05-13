@@ -3,9 +3,8 @@ from entity.CleaningService import CleaningService
 from entity.Category import Category
 
 class addShortlistController:
-     
-     
-    def add_to_shortlist(self, homeowner_id, service_id):
+    @staticmethod
+    def add_to_shortlist(homeowner_id, service_id):
         """
         Add a service to the homeowner's shortlist
         

@@ -25,20 +25,5 @@ class viewUserAccController:
             print(f"Error retrieving users: {e}")
             return []
             
-    @staticmethod
-    def get_user_by_id(user_id):
-        """
-        Get a specific user by ID
-        """
-        try:
-            user = User.find_by_id(user_id)
-            
-            if not user:
-                return None
-                
-            return user.to_dict()
-            
-        except Exception as e:
-            print(f"Error retrieving user: {e}")
-            return None
+
             

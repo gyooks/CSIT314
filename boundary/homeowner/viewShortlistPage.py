@@ -1,6 +1,7 @@
 from flask import Blueprint, render_template, request, redirect, url_for, flash, session
 from controller.homeowner.shortlistServiceController import shortlistServiceController
 from controller.homeowner.searchShortlistController import SearchShortlistController
+from controller.homeowner.viewShortlistController import viewShortlistController
 
 from datetime import datetime
 
@@ -21,7 +22,7 @@ def view_shortlist():
     homeowner_id = session['user_id']
     
     # Get all shortlisted services for the homeowner
-    shortlisted_services = shortlistServiceController.get_homeowner_shortlist(homeowner_id)
+    shortlisted_services = viewShortlistController.get_homeowner_shortlist(homeowner_id)
     
     return render_template('homeowner/shortlistPage.html', shortlisted_services=shortlisted_services)
 

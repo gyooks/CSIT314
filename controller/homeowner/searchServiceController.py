@@ -2,7 +2,8 @@ from entity.CleaningService import CleaningService
 from entity.Shortlist import Shortlist
 
 class searchServiceController:
-    def search_services(self, keyword):
+    @staticmethod
+    def search_services(keyword):
         """
         Search active cleaning services by keyword with cleaner info
         

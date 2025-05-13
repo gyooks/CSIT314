@@ -5,6 +5,7 @@ from controller.admin.createUserProfileController import CreateUserProfileContro
 from controller.admin.searchUserProfileController import SearchProfileController
 from controller.admin.suspendUserProfileController import SuspendProfileController
 from controller.admin.updateUserProfileController import UpdateProfileController
+from controller.admin.reactivateUserProfileController import reactivateUserProfileController
 
 # Create a single blueprint for all profile (role) management routes
 profile_management_bp = Blueprint('profile_management', __name__, url_prefix='/profile')
@@ -157,7 +158,7 @@ def reactivate_profile(role_id):
         return redirect(url_for('admin_login.userAdminLogin'))
     
     # Reactivate profile through controller
-    success, message = SuspendProfileController.reactivate_profile(role_id)
+    success, message = reactivateUserProfileController.reactivate_profile(role_id)
     
     if success:
         flash(message, "success")

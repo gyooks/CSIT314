@@ -3,6 +3,9 @@ from controller.homeowner.viewServiceController import viewCleanerServiceControl
 from controller.homeowner.viewDetailCleanerServiceController import viewDetailCleanerServiceController
 from controller.homeowner.shortlistServiceController import shortlistServiceController
 from controller.homeowner.bookingServiceController import BookingServiceController
+from controller.homeowner.addShortlistController import addShortlistController
+from controller.homeowner.createBookingController import createBookingController
+from controller.homeowner.searchServiceController import searchServiceController 
 from entity.Category import Category
 from datetime import datetime
 
@@ -93,7 +96,7 @@ def shortlist_service(service_id):
     homeowner_id = session['user_id']
     
     # Shortlist the service
-    success, message = shortlistServiceController.add_to_shortlist(homeowner_id, service_id)
+    success, message = addShortlistController.add_to_shortlist(homeowner_id, service_id)
     
     if success:
         flash(message, "success")
@@ -123,7 +126,7 @@ def book_service(service_id):
         return redirect(url_for('CleanerServiceManagementUI.view_services', service_id=service_id))
     
     # Book the service
-    success, message = BookingServiceController.create_booking(homeowner_id, service_id, booking_date, hours)
+    success, message = createBookingController.create_booking(homeowner_id, service_id, booking_date, hours)
     
     if success:
         flash(message, "success")
@@ -148,7 +151,7 @@ def search_services():
     keyword = request.args.get('keyword', '')
     
     # Search services
-    services = viewCleanerServiceController.search_services(keyword)
+    services = searchServiceController .search_services(keyword)
     
     # Get all active categories for filtering
     categories = Category.get_all_active()
