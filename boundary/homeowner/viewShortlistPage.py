@@ -1,5 +1,6 @@
 from flask import Blueprint, render_template, request, redirect, url_for, flash, session
 from controller.homeowner.shortlistServiceController import shortlistServiceController
+from controller.homeowner.searchShortlistController import SearchShortlistController
 
 from datetime import datetime
 
@@ -66,7 +67,7 @@ def search_shortlist():
     keyword = request.args.get('keyword', '')
     
     # Search shortlisted services
-    shortlisted_services = shortlistServiceController.search_shortlist(homeowner_id, keyword)
+    shortlisted_services = SearchShortlistController.search_shortlist(homeowner_id, keyword)
     
     
     return render_template(

@@ -1,5 +1,6 @@
 from flask import Blueprint, render_template, request, redirect, url_for, flash, session
 from controller.homeowner.bookingServiceController import BookingServiceController
+from controller.homeowner.searchBookingController import SearchBookingController
 from datetime import datetime
 
 # Create Homeowner Booking Management Blueprint
@@ -25,7 +26,7 @@ def view_bookings():
     
     # Get all bookings for this homeowner with optional filters
     if keyword:
-        bookings = BookingServiceController.search_bookings(homeowner_id, keyword)
+        bookings = SearchBookingController.search_bookings(homeowner_id, keyword)
     elif status:
         bookings = BookingServiceController.get_bookings_by_status(homeowner_id, status)
     else:
