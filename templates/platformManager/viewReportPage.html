@@ -31,7 +31,7 @@
         .main-content {
             padding: 20px;
         }
-        .report-container {
+        .report-container , .report-prediction {
             background-color: white;
             border-radius: 5px;
             padding: 20px;
@@ -43,6 +43,14 @@
             padding: 15px;
             margin-bottom: 15px;
             border-left: 4px solid #0d6efd;
+        }
+
+        .pred-card {
+            background-color: #f8f9fa;
+            border-radius: 5px;
+            padding: 15px;
+            margin-bottom: 15px;
+            border-left: 4px solid #ee932b;
         }
         .chart-container {
             height: 300px;
@@ -193,16 +201,28 @@
                                     });
                                 </script>
                             {% endif %}
-                            {% if report_data.predicted_next_day_bookings is not none %}
-                        <div class="row mb-4">
-                            <div class="col-md-3">
-                                <div class="stat-card" style="border-left-color: #20c997;">
-                                    <h5>Predicted Bookings (Tomorrow)</h5>
-                                    <h3>{{ report_data.predicted_next_day_bookings }}</h3>
+                        <div class="report-prediction">
+                            <div class="row mb-4">
+                                <div class="col-md-3">
+                                    <div class="pred-card">
+                                    {% if report_data.predicted_next_day_bookings is not none %}
+                                        <h5>Predicted Bookings (Tomorrow)</h5>
+                                        <h3>{{ report_data.predicted_next_day_bookings }}</h3>
+                                    </div>
+                                </div>
+                                <div class="col-md-3">
+                                    <div class="pred-card">
+                                        {% if report_data.predicted_next_day_revenue is not none %}
+                                            <h5>Predicted Revenue (Tomorrow)</h5>
+                                            <h3>${{ "%.2f"|format(report_data.predicted_next_day_revenue) }}</h3>
+                                    </div>
                                 </div>
                             </div>
-                        </div>
+                        </div>  
                         {% endif %}
+                    {% endif %}
+                        
+                        
                         {% elif report.reportType == 'Weekly Report' %}
                             <!-- Weekly Report Display -->
                             <div class="row mb-4">
@@ -212,18 +232,25 @@
                             </div>
                             
                             <div class="row mb-4">
-                                <div class="col-md-6">
+                                <div class="col-md-4">
                                     <div class="stat-card">
                                         <h5>Total Bookings</h5>
                                         <h3>{{ report_data.total_bookings }}</h3>
                                     </div>
                                 </div>
-                                <div class="col-md-6">
+                                <div class="col-md-4">
                                     <div class="stat-card">
                                         <h5>Total Revenue</h5>
                                         <h3>${{ "%.2f"|format(report_data.total_revenue) }}</h3>
                                     </div>
                                 </div>
+                                <div class="col-md-4">
+                                <div class="stat-card">
+                                    {% if report_data.previous_week_bookings is not none %}
+                                    <h5>Last Week Bookings</h5>
+                                    <h3>{{ report_data.previous_week_bookings }}</h3>
+                                </div>
+                            </div>
                             </div>
                             
                             <!-- Daily Statistics Chart -->
@@ -319,14 +346,16 @@
                                     });
                                 </script>
                             {% endif %}
-                            {% if report_data.predicted_next_week_bookings is not none %}
+                            
                         <div class="row mb-4">
                             <div class="col-md-3">
                                 <div class="stat-card" style="border-left-color: #0dcaf0;">
-                                    <h5>Predicted Bookings (Next Week)</h5>
-                                    <h3>{{ report_data.predicted_next_week_bookings }}</h3>
+                                    {% if report_data.predicted_next_week_bookings is not none %}
+                                        <h5>Predicted Bookings (Next Week)</h5>
+                                        <h3>{{ report_data.predicted_next_week_bookings }}</h3>
                                 </div>
                             </div>
+                            {% endif %}
                         </div>
                         {% endif %}
 

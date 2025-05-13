@@ -34,7 +34,7 @@ class GenerateDailyReportController(ReportBaseController):
             total_revenue = sum(booking.totalPrice for booking in daily_bookings if booking.totalPrice)
             confirmed_bookings = sum(1 for booking in daily_bookings if booking.bookingStatus == 'Confirmed')
             pending_bookings = sum(1 for booking in daily_bookings if booking.bookingStatus == 'Pending')
-
+            
             service_counts = {}
             for booking in daily_bookings:
                 service = CleaningService.find_by_id(booking.serviceID)
@@ -51,6 +51,12 @@ class GenerateDailyReportController(ReportBaseController):
             model = LinearRegression().fit(X, y)
             predicted_booking = int(model.predict(np.array([[7]]))[0])
 
+            revenue_series = []
+            for day in past_days:
+                bookings = Booking.get_bookings_by_date_range(day, day)
+                total = sum(b.totalPrice for b in bookings if b.totalPrice)
+                revenue_series.append(total)
+
             report_data = {
                 'report_date': today.strftime('%Y-%m-%d'),
                 'total_bookings': total_bookings,
@@ -61,8 +67,17 @@ class GenerateDailyReportController(ReportBaseController):
                 'predicted_next_day_bookings': predicted_booking
             }
 
-            return cls.save_report('Daily Report', report_data)
+            X = np.array(range(7)).reshape(-1, 1)
+            y_rev = np.array(revenue_series)
+            rev_model = LinearRegression().fit(X, y_rev)
+            predicted_revenue = float(rev_model.predict(np.array([[7]]))[0])
 
+            report_data['predicted_next_day_revenue'] = predicted_revenue
+
+            return cls.save_report('Daily Report', report_data)
+        
+
+        
         except Exception as e:
             print(f"Error generating daily report: {str(e)}")
             return False, f"Error generating daily report: {str(e)}"
@@ -76,7 +91,8 @@ class GenerateWeeklyReportController(ReportBaseController):
             start_date = end_date - timedelta(days=6)
 
             weekly_bookings = Booking.get_bookings_by_date_range(start_date, end_date)
-
+            # In Weekly Report
+           
             total_bookings = len(weekly_bookings)
             total_revenue = sum(b.totalPrice for b in weekly_bookings if b.totalPrice)
 
@@ -123,6 +139,13 @@ class GenerateWeeklyReportController(ReportBaseController):
                 'cleaner_performance': list(cleaner_stats.values()),
                 'predicted_next_week_bookings': predicted_next_week
             }
+
+            prev_week_start = start_date - timedelta(days=7)
+            prev_week_end = start_date - timedelta(days=1)
+            prev_week_bookings = Booking.get_bookings_by_date_range(prev_week_start, prev_week_end)
+            report_data['previous_week_bookings'] = len(prev_week_bookings)
+
+
 
             return cls.save_report('Weekly Report', report_data)
 
