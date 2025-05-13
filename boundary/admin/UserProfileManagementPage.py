@@ -81,7 +81,7 @@ def create_profile():
             flash(message, "error")
             return render_template('admin/create_userProfile.html')
 
-# Update profile routes
+# Update profile route
 @profile_management_bp.route('/edit/<int:role_id>', methods=['GET', 'POST'])
 def update_profile(role_id):
     """
@@ -91,19 +91,19 @@ def update_profile(role_id):
     if 'user_id' not in session:
         flash("You must be logged in to perform this action", "danger")
         return redirect(url_for('admin_login.userAdminLogin'))
-    
+        
     # GET request - show the update form
     if request.method == 'GET':
-        # Get profile from controller
-        userprofile = UpdateProfileController.get_profile_by_profile_id(role_id)
+        # Get profile from controller using the combined method
+        success, message, userprofile = UpdateProfileController.update_profile(role_id)
         
-        if not userprofile:
-            flash("Role not found", "error")
+        if not success:
+            flash(message, "error")
             return redirect(url_for('profile_management.view_profile'))
-        
+            
         # Render update profile form
         return render_template('admin/edit_userProfile.html', userprofile=userprofile)
-    
+        
     # POST request - update the profile
     elif request.method == 'POST':
         # Get form data
@@ -111,7 +111,7 @@ def update_profile(role_id):
         description = request.form.get('description')
         
         # Update profile through controller
-        success, message = UpdateProfileController.update_profile(
+        success, message, userprofile = UpdateProfileController.update_profile(
             role_id=role_id,
             role_name=role_name,
             description=description
@@ -122,10 +122,8 @@ def update_profile(role_id):
             return redirect(url_for('profile_management.view_profile'))
         else:
             flash(message, "error")
-            # Get profile data again to redisplay the form
-            userprofile = UpdateProfileController.get_profile_by_profile_id(role_id)
             return render_template('admin/edit_userProfile.html', userprofile=userprofile)
-
+            
 # Suspend/Reactivate profile routes
 @profile_management_bp.route('/suspend/<int:role_id>', methods=['POST'])
 def suspend_profile(role_id):
