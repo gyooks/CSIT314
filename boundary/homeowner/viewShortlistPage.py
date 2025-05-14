@@ -1,7 +1,7 @@
 from flask import Blueprint, render_template, request, redirect, url_for, flash, session
-from controller.homeowner.shortlistServiceController import shortlistServiceController
 from controller.homeowner.searchShortlistController import SearchShortlistController
 from controller.homeowner.viewShortlistController import viewShortlistController
+from controller.homeowner.HomeownerGeneralFunction import HomeownerGeneralFunction
 
 from datetime import datetime
 
@@ -43,7 +43,7 @@ def remove_from_shortlist(service_id):
     homeowner_id = session['user_id']
     
     # Remove service from shortlist
-    success, message = shortlistServiceController.remove_from_shortlist(homeowner_id, service_id)
+    success, message = HomeownerGeneralFunction.remove_from_shortlist(homeowner_id, service_id)
     
     if success:
         flash(message, "success")

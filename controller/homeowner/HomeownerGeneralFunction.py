@@ -2,9 +2,9 @@ from entity.Shortlist import Shortlist
 from entity.CleaningService import CleaningService
 from entity.Category import Category
 
-class ShortlistServiceController:
-    
-    def remove_from_shortlist(self, homeowner_id, service_id):
+class HomeownerGeneralFunction:
+    @staticmethod
+    def remove_from_shortlist(homeowner_id, service_id):
         """
         Remove a service from the homeowner's shortlist
         
@@ -28,5 +28,3 @@ class ShortlistServiceController:
             return False, "An error occurred while removing from shortlist"
     
     
-# Create controller instance
-shortlistServiceController = ShortlistServiceController()

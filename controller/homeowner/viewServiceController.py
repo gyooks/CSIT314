@@ -36,18 +36,6 @@ class ViewCleanerServiceController:
         """
         return Shortlist.get_shortlisted_service_ids(homeowner_id)
     
-    def is_service_shortlisted(self, homeowner_id, service_id):
-        """
-        Check if a service is shortlisted by a homeowner
-        
-        Args:
-            homeowner_id (int): ID of the homeowner
-            service_id (int): ID of the service
-            
-        Returns:
-            bool: True if service is shortlisted, False otherwise
-        """
-        return Shortlist.is_service_shortlisted(homeowner_id, service_id)
 
 
 

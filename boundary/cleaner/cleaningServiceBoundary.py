@@ -5,6 +5,7 @@ from controller.cleaner.searchCleaningServiceController import searchCleaningSer
 from controller.cleaner.suspendCleaningServiceController import suspendCleaningServiceController
 from controller.cleaner.updateCleaningServiceController import updateCleaningServiceController
 from controller.cleaner.viewDetailServiceController import viewDetailServiceController
+from controller.cleaner.reactivateCleaningServiceController import reactivateCleaningServiceController
 from entity.Category import Category
 
 # Create Cleaner Service Management Blueprint
@@ -197,7 +198,7 @@ def reactivate_service(service_id):
     cleaner_id = session['user_id']
 
     # Reactivate service
-    success, message = suspendCleaningServiceController.reactivate_service(service_id)
+    success, message = reactivateCleaningServiceController.reactivate_service(service_id)
     
     if success:
         flash(message, "success")

@@ -1,5 +1,7 @@
 from flask import Blueprint, render_template, request, redirect, url_for, flash, session
 from controller.cleaner.viewBookingController import ViewBookingController
+from controller.cleaner.filterBookingHistoryController import filterBookingHistoryController
+from controller.cleaner.cleanerGeneralFunction import cleanerGeneralFunction
 
 # Initialize the controller
 viewBookingController = ViewBookingController()
@@ -23,7 +25,7 @@ def manage_bookings():
     
     # Get all bookings for this cleaner with details
     if status_filter and status_filter != 'All':
-        bookings = viewBookingController.filter_bookings_by_status(cleaner_id, status_filter)
+        bookings = filterBookingHistoryController.filter_bookings_by_status(cleaner_id, status_filter)
     else:
         bookings = viewBookingController.get_cleaner_bookings_with_details(cleaner_id)
     
@@ -50,7 +52,7 @@ def update_booking_status(booking_id):
         return redirect(url_for('BookingManagementUI.manage_bookings'))
     
     # Get the booking
-    booking = viewBookingController.get_booking_by_id(booking_id)
+    booking = cleanerGeneralFunction.get_booking_by_id(booking_id)
     
     # Check if booking exists and belongs to the logged-in cleaner
     if not booking or booking.cleanerID != cleaner_id:
@@ -58,7 +60,7 @@ def update_booking_status(booking_id):
         return redirect(url_for('BookingManagementUI.manage_bookings'))
     
     # Update the booking status
-    if viewBookingController.update_booking_status(booking_id, new_status):
+    if cleanerGeneralFunction.update_booking_status(booking_id, new_status):
         flash(f"Booking status updated to {new_status}", "success")
     else:
         flash("Failed to update booking status", "danger")

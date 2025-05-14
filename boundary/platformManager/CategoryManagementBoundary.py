@@ -5,6 +5,7 @@ from controller.platformManager.createCategoryController import createCategoryCo
 from controller.platformManager.searchCategoryController import searchCategoryController
 from controller.platformManager.suspendCategoryController import suspendCategoryController
 from controller.platformManager.updateCategoryController import updateCategoryController
+from controller.platformManager.reactivateCategoryController import reactivateCategoryController
 
 # Create Platform Manager Category Blueprint
 CategoryManagementUI_bp = Blueprint('CategoryManagementUI', __name__, url_prefix='/platform_manager')
@@ -160,7 +161,7 @@ def reactivate_category(category_id):
     # This would typically have authentication checks to ensure only admins can access
     
     # Call controller to reactivate the category
-    success, message = suspendCategoryController.reactivate_category(category_id)
+    success, message = reactivateCategoryController.reactivate_category(category_id)
     
     if success:
         flash(message, 'success')

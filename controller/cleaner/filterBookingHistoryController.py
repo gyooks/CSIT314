@@ -1,8 +1,8 @@
 from entity.Booking import Booking
 
 class filterBookingHistoryController:
-
-    def filter_bookings_by_status(self, cleaner_id, status):
+    @staticmethod
+    def filter_bookings_by_status(cleaner_id, status):
             """
             Filter bookings by status for a cleaner
             

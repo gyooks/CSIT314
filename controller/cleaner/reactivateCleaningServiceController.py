@@ -1,8 +1,8 @@
 from entity.CleaningService import CleaningService
 
 class reactivateCleaningServiceController:
-     
-    def reactivate_service(self, service_id):
+    @staticmethod    
+    def reactivate_service(service_id):
         """
         Reactivate a suspended cleaning service
         
