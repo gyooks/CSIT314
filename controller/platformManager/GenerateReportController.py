@@ -32,8 +32,12 @@ class GenerateDailyReportController(ReportBaseController):
 
             total_bookings = len(daily_bookings)
             total_revenue = sum(booking.totalPrice for booking in daily_bookings if booking.totalPrice)
+            
+            # Track all four booking statuses
             confirmed_bookings = sum(1 for booking in daily_bookings if booking.bookingStatus == 'Confirmed')
             pending_bookings = sum(1 for booking in daily_bookings if booking.bookingStatus == 'Pending')
+            completed_bookings = sum(1 for booking in daily_bookings if booking.bookingStatus == 'Completed')
+            cancelled_bookings = sum(1 for booking in daily_bookings if booking.bookingStatus == 'Cancelled')
             
             service_counts = {}
             for booking in daily_bookings:
@@ -61,8 +65,10 @@ class GenerateDailyReportController(ReportBaseController):
                 'report_date': today.strftime('%Y-%m-%d'),
                 'total_bookings': total_bookings,
                 'total_revenue': float(total_revenue),
-                'confirmed_bookings': confirmed_bookings,
                 'pending_bookings': pending_bookings,
+                'confirmed_bookings': confirmed_bookings,
+                'completed_bookings': completed_bookings,
+                'cancelled_bookings': cancelled_bookings,
                 'service_distribution': service_counts,
                 'predicted_next_day_bookings': predicted_booking
             }
@@ -75,8 +81,6 @@ class GenerateDailyReportController(ReportBaseController):
             report_data['predicted_next_day_revenue'] = predicted_revenue
 
             return cls.save_report('Daily Report', report_data)
-        
-
         
         except Exception as e:
             print(f"Error generating daily report: {str(e)}")
@@ -91,10 +95,17 @@ class GenerateWeeklyReportController(ReportBaseController):
             start_date = end_date - timedelta(days=6)
 
             weekly_bookings = Booking.get_bookings_by_date_range(start_date, end_date)
-            # In Weekly Report
-           
+            
             total_bookings = len(weekly_bookings)
             total_revenue = sum(b.totalPrice for b in weekly_bookings if b.totalPrice)
+            
+            # Track all four booking statuses
+            status_counts = {
+                'Pending': sum(1 for b in weekly_bookings if b.bookingStatus == 'Pending'),
+                'Confirmed': sum(1 for b in weekly_bookings if b.bookingStatus == 'Confirmed'),
+                'Completed': sum(1 for b in weekly_bookings if b.bookingStatus == 'Completed'),
+                'Cancelled': sum(1 for b in weekly_bookings if b.bookingStatus == 'Cancelled')
+            }
 
             daily_stats = { (start_date + timedelta(days=i)).strftime('%Y-%m-%d'): {'bookings': 0, 'revenue': 0.0} for i in range(7) }
             for b in weekly_bookings:
@@ -135,6 +146,7 @@ class GenerateWeeklyReportController(ReportBaseController):
                 'end_date': end_date.strftime('%Y-%m-%d'),
                 'total_bookings': total_bookings,
                 'total_revenue': float(total_revenue),
+                'booking_status': status_counts,
                 'daily_statistics': daily_stats,
                 'cleaner_performance': list(cleaner_stats.values()),
                 'predicted_next_week_bookings': predicted_next_week
@@ -144,8 +156,6 @@ class GenerateWeeklyReportController(ReportBaseController):
             prev_week_end = start_date - timedelta(days=1)
             prev_week_bookings = Booking.get_bookings_by_date_range(prev_week_start, prev_week_end)
             report_data['previous_week_bookings'] = len(prev_week_bookings)
-
-
 
             return cls.save_report('Weekly Report', report_data)
 
@@ -165,6 +175,18 @@ class GenerateMonthlyReportController(ReportBaseController):
             total_bookings = len(monthly_bookings)
             total_revenue = sum(b.totalPrice for b in monthly_bookings if b.totalPrice)
             avg_value = total_revenue / total_bookings if total_bookings else 0
+            
+            # Track all four booking statuses
+            status_counts = {
+                'Pending': sum(1 for b in monthly_bookings if b.bookingStatus == 'Pending'),
+                'Confirmed': sum(1 for b in monthly_bookings if b.bookingStatus == 'Confirmed'),
+                'Completed': sum(1 for b in monthly_bookings if b.bookingStatus == 'Completed'),
+                'Cancelled': sum(1 for b in monthly_bookings if b.bookingStatus == 'Cancelled')
+            }
+            
+            # Calculate completion rate
+            eligible_bookings = status_counts['Completed'] + status_counts['Cancelled']
+            completion_rate = (status_counts['Completed'] / eligible_bookings) * 100 if eligible_bookings > 0 else 0
 
             weekly_trends = []
             for i in range(4):
@@ -206,6 +228,8 @@ class GenerateMonthlyReportController(ReportBaseController):
                 'total_bookings': total_bookings,
                 'total_revenue': float(total_revenue),
                 'average_booking_value': float(avg_value),
+                'booking_status': status_counts,
+                'completion_rate': float(completion_rate),
                 'weekly_trends': weekly_trends,
                 'category_performance': list(category_stats.values()),
                 'predicted_next_month_bookings': predicted_next_month

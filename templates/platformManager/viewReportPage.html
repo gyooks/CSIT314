@@ -128,16 +128,23 @@
                                         <h3>${{ "%.2f"|format(report_data.total_revenue) }}</h3>
                                     </div>
                                 </div>
-                                <div class="col-md-3">
+                                <div class="col-md-6">
                                     <div class="stat-card">
-                                        <h5>Confirmed Bookings</h5>
-                                        <h3>{{ report_data.confirmed_bookings }}</h3>
-                                    </div>
-                                </div>
-                                <div class="col-md-3">
-                                    <div class="stat-card">
-                                        <h5>Pending Bookings</h5>
-                                        <h3>{{ report_data.pending_bookings }}</h3>
+                                        <h5>Booking Status</h5>
+                                        <div class="row">
+                                            <div class="col-md-3">
+                                                <strong>Confirmed:</strong> {{ report_data.confirmed_bookings }}
+                                            </div>
+                                            <div class="col-md-3">
+                                                <strong>Pending:</strong> {{ report_data.pending_bookings }}
+                                            </div>
+                                            <div class="col-md-3">
+                                                <strong>Completed:</strong> {{ report_data.completed_bookings }}
+                                            </div>
+                                            <div class="col-md-3">
+                                                <strong>Cancelled:</strong> {{ report_data.cancelled_bookings }}
+                                            </div>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
@@ -182,15 +189,20 @@
                                             }
                                         });
                                         
-                                        // Booking status chart
+                                        // Booking status chart - updated to show all four statuses
                                         const statusCtx = document.getElementById('bookingStatusChart').getContext('2d');
                                         new Chart(statusCtx, {
                                             type: 'pie',
                                             data: {
-                                                labels: ['Confirmed', 'Pending'],
+                                                labels: ['Confirmed', 'Pending', 'Completed', 'Cancelled'],
                                                 datasets: [{
-                                                    data: [{{ report_data.confirmed_bookings }}, {{ report_data.pending_bookings }}],
-                                                    backgroundColor: ['#1cc88a', '#f6c23e']
+                                                    data: [
+                                                        {{ report_data.confirmed_bookings }}, 
+                                                        {{ report_data.pending_bookings }},
+                                                        {{ report_data.completed_bookings }},
+                                                        {{ report_data.cancelled_bookings }}
+                                                    ],
+                                                    backgroundColor: ['#1cc88a', '#f6c23e', '#4e73df', '#e74a3b']
                                                 }]
                                             },
                                             options: {
@@ -253,12 +265,45 @@
                             </div>
                             </div>
                             
-                            <!-- Daily Statistics Chart -->
+                            <!-- Booking Status Section -->
                             <div class="row mb-4">
                                 <div class="col-md-12">
+                                    <div class="stat-card">
+                                        <h5>Booking Status</h5>
+                                        <div class="row">
+                                            <div class="col-md-3 text-center">
+                                                <h6>Confirmed</h6>
+                                                <h4>{{ report_data.booking_status.Confirmed }}</h4>
+                                            </div>
+                                            <div class="col-md-3 text-center">
+                                                <h6>Pending</h6>
+                                                <h4>{{ report_data.booking_status.Pending }}</h4>
+                                            </div>
+                                            <div class="col-md-3 text-center">
+                                                <h6>Completed</h6>
+                                                <h4>{{ report_data.booking_status.Completed }}</h4>
+                                            </div>
+                                            <div class="col-md-3 text-center">
+                                                <h6>Cancelled</h6>
+                                                <h4>{{ report_data.booking_status.Cancelled }}</h4>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- Daily Statistics Chart -->
+                            <div class="row mb-4">
+                                <div class="col-md-8">
                                     <h4>Daily Statistics</h4>
                                     <div class="chart-container">
                                         <canvas id="dailyStatsChart"></canvas>
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <h4>Booking Status</h4>
+                                    <div class="chart-container">
+                                        <canvas id="weeklyStatusChart"></canvas>
                                     </div>
                                 </div>
                             </div>
@@ -343,6 +388,28 @@
                                                 }
                                             }
                                         });
+                                        
+                                        // Booking status pie chart
+                                        const statusCtx = document.getElementById('weeklyStatusChart').getContext('2d');
+                                        new Chart(statusCtx, {
+                                            type: 'pie',
+                                            data: {
+                                                labels: ['Confirmed', 'Pending', 'Completed', 'Cancelled'],
+                                                datasets: [{
+                                                    data: [
+                                                        {{ report_data.booking_status.Confirmed }},
+                                                        {{ report_data.booking_status.Pending }},
+                                                        {{ report_data.booking_status.Completed }},
+                                                        {{ report_data.booking_status.Cancelled }}
+                                                    ],
+                                                    backgroundColor: ['#1cc88a', '#f6c23e', '#4e73df', '#e74a3b']
+                                                }]
+                                            },
+                                            options: {
+                                                responsive: true,
+                                                maintainAspectRatio: false
+                                            }
+                                        });
                                     });
                                 </script>
                             {% endif %}
@@ -369,32 +436,71 @@
                             </div>
                             
                             <div class="row mb-4">
-                                <div class="col-md-4">
+                                <div class="col-md-3">
                                     <div class="stat-card">
                                         <h5>Total Bookings</h5>
                                         <h3>{{ report_data.total_bookings }}</h3>
                                     </div>
                                 </div>
-                                <div class="col-md-4">
+                                <div class="col-md-3">
                                     <div class="stat-card">
                                         <h5>Total Revenue</h5>
                                         <h3>${{ "%.2f"|format(report_data.total_revenue) }}</h3>
                                     </div>
                                 </div>
-                                <div class="col-md-4">
+                                <div class="col-md-3">
                                     <div class="stat-card">
                                         <h5>Avg. Booking Value</h5>
                                         <h3>${{ "%.2f"|format(report_data.average_booking_value) }}</h3>
+                                    </div>
+                                </div>
+                                <div class="col-md-3">
+                                    <div class="stat-card">
+                                        <h5>Completion Rate</h5>
+                                        <h3>{{ "%.1f"|format(report_data.completion_rate) }}%</h3>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- Booking Status Section -->
+                            <div class="row mb-4">
+                                <div class="col-md-12">
+                                    <div class="stat-card">
+                                        <h5>Booking Status</h5>
+                                        <div class="row">
+                                            <div class="col-md-3 text-center">
+                                                <h6>Confirmed</h6>
+                                                <h4>{{ report_data.booking_status.Confirmed }}</h4>
+                                            </div>
+                                            <div class="col-md-3 text-center">
+                                                <h6>Pending</h6>
+                                                <h4>{{ report_data.booking_status.Pending }}</h4>
+                                            </div>
+                                            <div class="col-md-3 text-center">
+                                                <h6>Completed</h6>
+                                                <h4>{{ report_data.booking_status.Completed }}</h4>
+                                            </div>
+                                            <div class="col-md-3 text-center">
+                                                <h6>Cancelled</h6>
+                                                <h4>{{ report_data.booking_status.Cancelled }}</h4>
+                                            </div>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
                             
                             <!-- Weekly Trends Chart -->
                             <div class="row mb-4">
-                                <div class="col-md-12">
+                                <div class="col-md-8">
                                     <h4>Weekly Trends</h4>
                                     <div class="chart-container">
                                         <canvas id="weeklyTrendsChart"></canvas>
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <h4>Booking Status</h4>
+                                    <div class="chart-container">
+                                        <canvas id="monthlyStatusChart"></canvas>
                                     </div>
                                 </div>
                             </div>
@@ -500,6 +606,28 @@
                                                     backgroundColor: [
                                                         '#4e73df', '#1cc88a', '#36b9cc', '#f6c23e', '#e74a3b'
                                                     ]
+                                                }]
+                                            },
+                                            options: {
+                                                responsive: true,
+                                                maintainAspectRatio: false
+                                            }
+                                        });
+                                        
+                                        // Monthly booking status pie chart
+                                        const monthlyStatusCtx = document.getElementById('monthlyStatusChart').getContext('2d');
+                                        new Chart(monthlyStatusCtx, {
+                                            type: 'pie',
+                                            data: {
+                                                labels: ['Confirmed', 'Pending', 'Completed', 'Cancelled'],
+                                                datasets: [{
+                                                    data: [
+                                                        {{ report_data.booking_status.Confirmed }},
+                                                        {{ report_data.booking_status.Pending }},
+                                                        {{ report_data.booking_status.Completed }},
+                                                        {{ report_data.booking_status.Cancelled }}
+                                                    ],
+                                                    backgroundColor: ['#1cc88a', '#f6c23e', '#4e73df', '#e74a3b']
                                                 }]
                                             },
                                             options: {
