@@ -120,52 +120,6 @@ for _ in range(100):
         VALUES (%s, %s, %s, %s, %s, %s, %s)
     """, (homeowner_id, service_id, cleaner_id, booking_date, booking_hour, price, booking_status))
 
-# Report types available
-#report_types = ['Daily Report', 'Weekly Report', 'Monthly Report']
-
-#service_types = ["Office Cleaning", "Basic Home Cleaning", "Full House Deep Clean"]
-
-
-# Generate 100 report entries
-#for _ in range(100):
-    # Randomly select report type and generate the report date
-    #report_type = random.choice(report_types)
-   # report_date = fake.date_this_year()  # Random date in the current year
-    
-    # Ensure the date is converted to a string (YYYY-MM-DD)
-    #if isinstance(report_date, datetime.date):  # Check if it's a date object
-       # report_date_str = report_date.strftime('%Y-%m-%d')
-    #else:
-        #report_date_str = str(report_date)
-
-    # Generate service distribution (random number of services)
-    #service_distribution = {service: random.randint(0, 3) for service in service_types}
-    
-    # Generate other report metrics
-    #total_revenue = round(random.uniform(100.0, 1000.0), 2)  # Random total revenue
-    #total_bookings = sum(service_distribution.values())  # Total bookings based on distribution
-    #pending_bookings = random.randint(0, total_bookings)  # Random pending bookings
-    #confirmed_bookings = total_bookings - pending_bookings  # Confirmed bookings = total - pending
-    
-    # Structure the data as JSON
-    #report_data = {
-        #"report_date": report_date_str,
-        #"total_revenue": total_revenue,
-        #"total_bookings": total_bookings,
-        #"pending_bookings": pending_bookings,
-        #"confirmed_bookings": confirmed_bookings,
-        #"service_distribution": service_distribution
-    #}
-    
-    # Convert the report data to a JSON string for insertion into the DB
-    #report_data_json = json.dumps(report_data)
-    
-    # Insert into the REPORT table
-    #cursor.execute("""
-    #    INSERT INTO REPORT (reportType, reportData)
-    #    VALUES (%s, %s)
-    #""", (report_type, report_data_json))
-
 conn.commit()
 cursor.close()
 conn.close()

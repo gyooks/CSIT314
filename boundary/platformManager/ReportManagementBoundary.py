@@ -1,10 +1,9 @@
 from flask import Blueprint, render_template, request, redirect, url_for, flash, session, jsonify
 from entity.Report import Report
-from controller.platformManager.GenerateReportController import (
-    GenerateDailyReportController,
-    GenerateWeeklyReportController,
-    GenerateMonthlyReportController
-)
+from controller.platformManager.GenerateReportController import ReportBaseController
+from controller.platformManager.GenerateDailyReportController import GenerateDailyReportController
+from controller.platformManager.GenerateWeeklyReportController import GenerateWeeklyReportController
+from controller.platformManager.GenerateMonthlyReportController import GenerateMonthlyReportController
 import json
 
 # Create the blueprint
