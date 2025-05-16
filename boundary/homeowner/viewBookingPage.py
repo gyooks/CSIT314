@@ -33,7 +33,7 @@ def view_bookings():
         bookings = viewBookingHistoryController.get_all_bookings(homeowner_id)
     
     # Get all possible booking statuses for filtering
-    statuses = ['Pending', 'Confirmed', 'Completed', 'Cancelled', 'Rejected']
+    statuses = ['Pending', 'Confirmed', 'Completed', 'Cancelled']
     
     return render_template('homeowner/bookingListingPage.html', 
                            bookings=bookings, 

@@ -53,13 +53,20 @@ def view_user_detail(target_user_id):
 
 @user_management_bp.route('/create', methods=['GET', 'POST'])
 def create_user():
-    
-    # This would typically have authentication checks to ensure only admins can access
+    # Authentication check to ensure only logged-in users can access
     if 'user_id' not in session:
         flash("You must be logged in to perform this action", "danger")
         return redirect(url_for('admin_login.userAdminLogin'))
     user_id = session['user_id']
-        
+    
+    # Get all active user profiles/roles for the form
+    profiles = UserProfile.get_all_active()
+    
+    # Filter out the admin role(s)
+    # Simple filtering to remove any roles with 'admin' in the name
+    non_admin_profiles = [profile for profile in profiles 
+                         if 'admin' not in profile.role_name.lower()]
+    
     if request.method == 'POST':
         # Get form data
         email = request.form.get('email')
@@ -74,15 +81,11 @@ def create_user():
         # Basic validation
         if not email or not password or not role_id:
             flash('Email, password, and role are required fields', 'error')
-            # Get user profiles (roles) for the form
-            profiles = UserProfile.get_all_active()
-            return render_template('admin/createUserAccPage.html', profiles=profiles)
-            
+            return render_template('admin/createUserAccPage.html', profiles=non_admin_profiles)
+        
         if password != confirm_password:
             flash('Passwords do not match', 'error')
-            # Get user profiles (roles) for the form
-            profiles = UserProfile.get_all_active()
-            return render_template('admin/createUserAccPage.html', profiles=profiles)
+            return render_template('admin/createUserAccPage.html', profiles=non_admin_profiles)
         
         # Use the controller to create user with all profile info in one operation
         success, message, new_user_id = createUserAccController.create_user(
@@ -97,28 +100,24 @@ def create_user():
         
         if not success:
             flash(message, 'error')
-            # Get user profiles (roles) for the form
-            profiles = UserProfile.get_all_active()
-            return render_template('admin/createUserAccPage.html', profiles=profiles)
-                
+            return render_template('admin/createUserAccPage.html', profiles=non_admin_profiles)
+        
         flash("User created successfully", 'success')
         return redirect(url_for('user_management.view_users'))
     
-    # GET request - show the form
-    # Fetch all user profiles from the database to populate the dropdown
-    profiles = UserProfile.get_all_active()
-    return render_template('admin/createUserAccPage.html', profiles=profiles)
+    # GET request - just display the form with non-admin roles
+    return render_template('admin/createUserAccPage.html', profiles=non_admin_profiles)
 
 @user_management_bp.route('/edit/<int:target_user_id>', methods=['GET', 'POST'])
 def update_user(target_user_id):
     """
-    Update a user
+    Update a user - admin roles not shown in dropdown
     """
     # Check if user is logged in
     if 'user_id' not in session:
         flash("You must be logged in to perform this action", "danger")
         return redirect(url_for('admin_login.userAdminLogin'))
-        
+    
     # GET request - show the update form
     if request.method == 'GET':
         # Get user from controller with the combined method
@@ -128,13 +127,17 @@ def update_user(target_user_id):
             flash(message, "error")
             return redirect(url_for('user_management.view_users'))
         
-        # Get all available roles/profiles for dropdown
+        # Get all available non-admin roles/profiles for dropdown
         from entity.UserProfile import UserProfile
-        profiles = UserProfile.get_all_active()
+        all_profiles = UserProfile.get_all_active()
         
-        # Render update user form
-        return render_template('admin/edit_user.html', user=user, profiles=profiles)
+        # Filter out admin roles
+        non_admin_profiles = [profile for profile in all_profiles 
+                             if 'admin' not in profile.role_name.lower()]
         
+        # Render update user form with non-admin roles only
+        return render_template('admin/edit_user.html', user=user, profiles=non_admin_profiles)
+    
     # POST request - update the user
     elif request.method == 'POST':
         # Get form data
@@ -163,11 +166,13 @@ def update_user(target_user_id):
             return redirect(url_for('user_management.view_users'))
         else:
             flash(f"Error updating user: {message}", "error")
+            # Get non-admin roles again for form redisplay
             from entity.UserProfile import UserProfile
-            profiles = UserProfile.get_all_active()
-            return render_template('admin/edit_user.html', user=user or {}, profiles=profiles)
-
-
+            all_profiles = UserProfile.query.filter_by(roleStatus=True).all()
+            non_admin_profiles = [profile for profile in all_profiles 
+                                 if 'admin' not in profile.role_name.lower()]
+            return render_template('admin/edit_user.html', user=user or {}, profiles=non_admin_profiles)
+            
 # Suspend/Reactivate user routes
 @user_management_bp.route('/suspend/<int:target_user_id>', methods=['POST'])
 def suspend_user(target_user_id):

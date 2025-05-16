@@ -75,10 +75,7 @@ class Category(db.Model):
         db.session.add(self)
         db.session.commit()
     
-    def delete_from_db(self):
-        """Delete category from database"""
-        db.session.delete(self)
-        db.session.commit()
+
         
     def update_in_db(self, name, description, categoryStatus):
         """Update category attributes"""
